@@ -1,8 +1,44 @@
 ## Kubernetes 설정 
 
+#### ■ Kubernetes 설치 전 서버 구성 변경 
+- Swap 영역을 비활성화 
 
-#### ○ Master 초기화 
-Overlay network 종류에 따라 약간씩 상이한 설정 필요 `--pod-network-cidr 10.244.0.0/16`
+```bash
+# 일시적인 설정 
+swapoff -a
+
+# 영구적인 설정 
+# 아래 swap 파일 시스템을 주석처리 
+vi /etc/fstab
+
+# /dev/mapper/kube--master--vg-swap_1 none            swap    sw              0       0
+```
+
+- 브릿지 네트워크 할성화 
+
+```bash
+vi /etc/ufw/sysctl.conf
+
+
+net/bridge/bridge-nf-call-ip6tables = 1
+net/bridge/bridge-nf-call-iptables = 1
+net/bridge/bridge-nf-call-arptables = 1
+
+```
+
+- 참고 : https://www.mirantis.com/blog/how-install-kubernetes-kubeadm/
+
+---
+
+#### ■ Kubernetes 설치 
+- Kubernetes 버전에 따른 Docker 버전 확인 필요 
+- 다른 링크 참고 
+
+---
+
+#### ■ Master 초기화 : Kubernetes 의 Master 노드를 초기화 
+- Overlay network 종류에 따라 상이한 설정 필요 `--pod-network-cidr 10.244.0.0/16`
+- Overlay network으로 flannel 사용 
 
 ```bash
 sudo kubeadm init --pod-network-cidr 10.244.0.0/16
@@ -48,7 +84,7 @@ kube-system   kube-scheduler-kube-master            1/1       Running   0       
 
 ---
 
-#### ○ Overlay network : flannel 설치
+#### ■ Overlay network : flannel 설치
 - Kubernetes의 클러스터를 관리하기 위한 오버레이 네트워크 설치 
 - Overlay network 종류 : https://kubernetes.io/docs/concepts/cluster-administration/networking/
 	- ※ weave-net 의 예제가 많았는데 뭔가 잘 되지 않았음 
@@ -72,7 +108,7 @@ kube-system   kube-scheduler-kube-master            1/1       Running   0       
 
 ---
 
-#### ○ Worker Node 추가(Join) 
+#### ■ Worker Node 추가(Join) 
 - Master가 아닌 다른 머신에서 실행 
 
 ```bash
@@ -90,10 +126,12 @@ kube-node02   Ready     <none>    4m        v1.10.3
 
 ---
 
-#### ○ 배포 / 서비스 추가 : 명령어 기반 
+#### ■ 배포 / 서비스 추가 : 명령어 기반 
 - Docker 이미지를 빌드하여 Docker Hub에 업로드 : 서비스에는 Private Hub 구성 필요 
 	- run 명령으로 Pod, Deployment 생성 
 	- expose 명령으로 Deployment 기준으로 서비스 생성 
+  - [Kubernetes NodePort vs LoadBalancer vs Ingress? When should I use what?](https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0)
+
 
 ```bash
 # pod 및 배포(deployment) 생성 
@@ -127,7 +165,9 @@ mvc          NodePort    10.107.73.137   <none>        80:32074/TCP   14s
 </html>
 ```
 
-#### ○ Scale / 이미지 변경(배포)
+---
+
+#### ■ Scale / 이미지 변경(배포)
 
 - 복재 생성 : replicas 속성을 이용하여 scale(노드개수) 조정 
 
@@ -192,7 +232,7 @@ deployment.apps "mvc"
 
 ---
 
-#### ○ 배포 / 서비스 추가 : yaml 파일 기반 
+#### ■ 배포 / 서비스 추가 : yaml 파일 기반 
 - 정책을 정의한 yaml 기반 정의 
 - NodePort 기반의 Deployment 및 서비스 정의 
 
@@ -254,7 +294,9 @@ service "mvcapp" created
 
 ```
 
-#### ○ Ingress 컨트롤러 설치 및 정의 
+---
+
+#### ■ Ingress 컨트롤러 설치 및 정의 
 - ingress-nginx repository : https://github.com/kubernetes/ingress-nginx
 - RBAC 기반 설치 : 역할 기반 접근 제어(role-based access control)
 - ingress-nginx namespace 생성 후, 설치 
@@ -390,7 +432,7 @@ mvcapp-ingress   *                   80        24s
 
 ---
 
-#### ○ 대시보드 설치  
+#### ■ 대시보드 설치  
 
 ```bash
 # dashboard
@@ -401,7 +443,7 @@ kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/
 
 ---
 
-#### ○ 기타 명령어 모음 
+#### ■ 기타 명령어 모음 
 
 ```bash
 docker build --tag mvcapp:0.1 .
@@ -417,3 +459,6 @@ kubectl describe deployment/mvc
 # eth0 -> ?? -> ingress(nginx) -> ingress_contoller -> NodePort -> Docker 
 
 ```
+
+
+
