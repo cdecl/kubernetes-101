@@ -2,6 +2,7 @@
 
 
 #### ○ Master 초기화 
+Overlay network 종류에 따라 약간씩 상이한 설정 필요 `--pod-network-cidr 10.244.0.0/16`
 
 ```bash
 sudo kubeadm init --pod-network-cidr 10.244.0.0/16
