@@ -429,6 +429,42 @@ mvcapp-ingress   *                   80        24s
 
 ```
 
+---
+
+#### ■ Expose direct ports on bare metal
+- 레딧 : [Best way to expose direct ports on bare metal](https://www.reddit.com/r/kubernetes/comments/85ewlw/best_way_to_expose_direct_ports_on_bare_metal/)
+- 서비스를 직접 노출하는 방법 
+	- Reverse Proxy : Nginx 류의 서비스로 리버스 프록시 구성 
+		- LB → Nginx → Ingress → NodePort → Pod 
+	- ExtenalPs 지정 : Bare Metal 장비의 외부 IP를 세팅
+		- 각 머신에서는 등록된 자신의 IP 기준으로 Listen  
+		- LB → Ingress → NodePort → Pod 
+
+```yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+  labels:
+    app: ingress-nginx
+spec:
+  type: NodePort
+  selector:
+    app: ingress-nginx
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  - name: https
+    port: 443
+    targetPort: https
+  externalIPs:
+  - 192.168.137.20
+  - 192.168.137.116
+  - 192.168.137.64
+
+``` 
 
 ---
 
@@ -449,6 +485,8 @@ kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/
 docker build --tag mvcapp:0.1 .
 
 kubectl get pod
+kubectl get pod -o wide 
+kubectl get pod --all-namespaces
 kubectl get svc
 kubectl describe service
 kubectl describe service/mvc
