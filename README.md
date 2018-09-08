@@ -468,33 +468,51 @@ spec:
 
 ---
 
-#### ■ 대시보드 설치  
+#### ■ Dashboard 설치  
 
 ```bash
 # dashboard
 kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
 ```
 
+- Dashboard 어플리케이션에 cluster-admin 부여 : 인증없이 접속 
+	- [dashboard-admin.yaml](dashboard-admin.yaml)
+	- Apply the full admin privileges to dashboard service account using the dashboard-admin YAML file.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-dashboard
+  labels:
+    k8s-app: kubernetes-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard
+  namespace: kube-system
+
+```
+
+- Role 적용, Proxy 서비스 실행  
+```bash
+kubectl apply -f dashboard-admin.yaml
+kubectl proxy --address=0.0.0.0 --accept-hosts=^*$
+```
+
+- Dashboard 접속 : http://kube-master:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/
 
 
 ---
 
-#### ■ 기타 명령어 모음 
+#### ■ 기타
 
 ```bash
+# docket build 
 docker build --tag mvcapp:0.1 .
-
-kubectl get pod
-kubectl get pod -o wide 
-kubectl get pod --all-namespaces
-kubectl get svc
-kubectl describe service
-kubectl describe service/mvc
-kubectl describe deployment
-kubectl describe deployment/mvc
-
-
-# eth0 -> ?? -> ingress(nginx) -> ingress_contoller -> NodePort -> Docker 
 
 ```
 
