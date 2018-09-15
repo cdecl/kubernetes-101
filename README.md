@@ -1,5 +1,6 @@
 ## Kubernetes 설정 
 
+### 사전 준비 
 #### ■ Kubernetes 설치 전 서버 구성 변경 
 - Swap 영역을 비활성화 
 
@@ -30,24 +31,25 @@ net/bridge/bridge-nf-call-arptables = 1
 
 ---
 
-#### ■ Kubernetes 설치 
-- Kubernetes 버전에 따른 Docker 버전 확인 필요 
-- 다른 링크 참고 
+### 설치 및 설정
 
----
+#### ■ Kubernetes 설치 
+- Kubernetes 버전에 맞는 Docker 버전을 확인해야 함 
+- 설치 참고 : [Installing kubeadm](https://kubernetes.io/docs/setup/independent/install-kubeadm/) 
 
 #### ■ Master 초기화 : Kubernetes 의 Master 노드를 초기화 
-- Overlay network 종류에 따라 상이한 설정 필요 `--pod-network-cidr 10.244.0.0/16`
-- Overlay network으로 flannel 사용 
-
+- Kubernetes의 Master를 초기화 하려면 뒤에 설치할 Overlay network에 따른 옵션이 필요
+- Overlay network으로는 flannel 사용 
+	- 옵션에 네트워크 클래스 대역을 설정 필요 : `--pod-network-cidr 10.244.0.0/16`
+- Master 초기화
 ```bash
 sudo kubeadm init --pod-network-cidr 10.244.0.0/16
 ```
 
-- Master 초기화 이후 아래와 같은 메세지가 나옴 
-	- 위의 3줄 명령어는 kubectl 를 사용하기 위한 config 설정이므로 그대로 실행 
-	- init 을 2번째 이후 부터는 2번째 cp 명령만 진행 하면 됨
-	- 마지막 `kubeadm join` 명령은 Master가 아닌 Worker Node 에서 Master 에 Join 하는 명령어 (복사해둠)
+- Master 초기화 이후 아래의 메세지 출력 
+	- mkdir로 시작하는 3줄 명령어는 kubectl 를 사용하기 위한 config 설정이므로 그대로 실행 
+	- 초기화를 한번이라도 했따면 2번째 cp 명령만 실행 해도 됨
+	- 마지막 `kubeadm join` 명령은 Master가 아닌 Worker Node 에서 Master 에 Join 하는 명령어 `나중에 실행 해야하므로 보관`
 	
 ```bash
 [init] Using Kubernetes version: v1.10.5
@@ -69,7 +71,7 @@ as root:
 
 ```
 
-- Pod 의 상태 확인 : dns 서비스가 Pending 상태
+- 초기화 이후 Pod 의 상태 확인하면 dns 서비스가 Pending 상태
 
 ```
 > kubectl get pod --all-namespaces
@@ -82,18 +84,16 @@ kube-system   kube-proxy-6m8bw                      1/1       Running   0       
 kube-system   kube-scheduler-kube-master            1/1       Running   0          5m
 ```
 
----
-
 #### ■ Overlay network : flannel 설치
 - Kubernetes의 클러스터를 관리하기 위한 오버레이 네트워크 설치 
 - Overlay network 종류 : https://kubernetes.io/docs/concepts/cluster-administration/networking/
-	- ※ weave-net 의 예제가 많았는데 뭔가 잘 되지 않았음 
+	- 개인적으로 weave-net 의 예제가 많았는데 뭔가 잘 되지 않았음 
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 ```
 
-- 설치 이후 dns 서비스가 정상적으로 Running 
+- 설치 이후 Pod 의 상태 확인하면 dns 서비스가 정상적으로 Running 
 
 ```bash
 NAMESPACE     NAME                                  READY     STATUS    RESTARTS   AGE
@@ -105,8 +105,6 @@ kube-system   kube-flannel-ds-amd64-f2ln5           1/1       Running   0       
 kube-system   kube-proxy-6m8bw                      1/1       Running   0          1h
 kube-system   kube-scheduler-kube-master            1/1       Running   0          36s
 ```
-
----
 
 #### ■ Worker Node 추가(Join) 
 - Master가 아닌 다른 머신에서 실행 
@@ -125,8 +123,9 @@ kube-node02   Ready     <none>    4m        v1.10.3
 ```
 
 ---
+### 서비스 배포 : 명령어 기반 
 
-#### ■ 배포 / 서비스 추가 : 명령어 기반 
+#### ■ 배포 / 서비스 추가 
 - Docker 이미지를 빌드하여 Docker Hub에 업로드 : 서비스에는 Private Hub 구성 필요 
 	- run 명령으로 Pod, Deployment 생성 
 	- expose 명령으로 Deployment 기준으로 서비스 생성 
@@ -164,8 +163,6 @@ mvc          NodePort    10.107.73.137   <none>        80:32074/TCP   14s
     </body>
 </html>
 ```
-
----
 
 #### ■ Scale / 이미지 변경(배포)
 
@@ -231,8 +228,9 @@ deployment.apps "mvc"
 ```
 
 ---
+### 서비스 배포 :  yaml 파일 기반 
 
-#### ■ 배포 / 서비스 추가 : yaml 파일 기반 
+#### ■ 배포 / 서비스 추가  
 - 정책을 정의한 yaml 기반 정의 
 - NodePort 기반의 Deployment 및 서비스 정의 
 
@@ -295,15 +293,20 @@ service "mvcapp" created
 ```
 
 ---
+### 서비스 노출 
 
 #### ■ Ingress 컨트롤러 설치 및 정의 
+- Ingress 컨트롤러는 외부 서비스 접속을 위한 도메인, URL 기반 서비스 분기 역할 `L7 레이어 기능`
+- 그중 가장 많이 활성화 된 nginx 기반 Ingress 컨트롤러 이용 
 - ingress-nginx repository : https://github.com/kubernetes/ingress-nginx
 - RBAC 기반 설치 : 역할 기반 접근 제어(role-based access control)
-- ingress-nginx namespace 생성 후, 설치 
-	- 이전버전 설치시 서비스가 만들어지지 않았는데, 현재('18 07/17) 기준 서비스까지 만들어줌
-	- 그런데 ClusterIP 기반으로 설치되어 NodePort 기반으로 수정 (ClusterIP는 Bare Metal 기반에서는 지원 안함) 
-		- --publish-service=$(POD_NAMESPACE)/ingress-nginx 라인 주석처리 후 서비스 생성추가 
-	- 별도 서비스까지 생성하는 버전 (NodePort 기반 서비스 생성) : [mandatory-0.17.yaml](mandatory-0.17.yaml)
+- 서비스 변경 : ClusterIP → NodePort
+	- ingress-nginx 에서 제공하는 yaml 파일로 설치를 하면 ClusterIP 기반으로 서비스로 설치 
+	- Bare Metal 환경에서는 ClusterIP를 지원하지 않기 때문에 NodePort 기반으로 수정  
+		- --publish-service=$(POD_NAMESPACE)/ingress-nginx 라인 주석처리 후 서비스 생성추가
+		- 별도 서비스까지 생성하는 버전 (NodePort 기반 서비스 생성) : [mandatory-0.17.yaml](mandatory-0.17.yaml)
+	- 서비스 생성후 kubectl edit 명령으로 서비스를 수정 해도 됨 
+		- `deployment nginx-ingress-controller  -n ingress-nginx`
 
 ```bash
 # 공식 레포지토리 버전 
@@ -359,15 +362,16 @@ kube-system     kube-dns               ClusterIP   10.96.0.10       <none>      
 
 ```
 
-- Ingress 서비스 확인 : 서비스가 존재하지 않아 default-http-backend 로 제공 
+- Ingress 서비스 IP:Port로 확인 : 현재는 Ingress 등록 서비스가 존재하지 않아 default-http-backend 로 리다이렉트
 
 ```bash 
 > curl 10.110.129.111
 default backend - 404
 ```
 
-- Ingress 설정 적용 
-	- NodePort 기반 mvcapp 서비스를 Ingress 기반 서비스 연결 
+- Ingress 서비스 등록
+	- mvcapp 서비스를 Ingress 기반 서비스에 등록
+	- 주석과 같이 host 및 url 기반으로도 가능 
 
 ```yaml
 # ingress-mvcapp.yaml
@@ -429,16 +433,15 @@ mvcapp-ingress   *                   80        24s
 
 ```
 
----
-
-#### ■ Expose direct ports on bare metal
+#### ■ 서비스 외부 노출 Expose direct ports on bare metal
 - 레딧 : [Best way to expose direct ports on bare metal](https://www.reddit.com/r/kubernetes/comments/85ewlw/best_way_to_expose_direct_ports_on_bare_metal/)
 - 서비스를 직접 노출하는 방법 
 	- Reverse Proxy : Nginx 류의 서비스로 리버스 프록시 구성 
-		- LB → Nginx → Ingress → NodePort → Pod 
-	- ExtenalPs 지정 : Bare Metal 장비의 외부 IP를 세팅
+		- 외부 → Nginx(pass) → Ingress(내부서비스IP) → NodePort → Pod 
+	- ExtenalPs 지정 : Bare Metal 장비의 Public IP를 세팅
 		- 각 머신에서는 등록된 자신의 IP 기준으로 Listen  
-		- LB → Ingress → NodePort → Pod 
+		- 외부 → Ingress(externalIPs) → NodePort → Pod 
+		- externalIPs에 등록된 서버에서 서비스가 구동되면 해당 IP로 외부서비스 노출 (LISTEN)
 
 ```yaml
 kind: Service
@@ -468,14 +471,15 @@ spec:
 
 ---
 
-#### ■ Dashboard 설치  
+### Dashboard 설치  
+- Kubernetes의 리소스 상태를 확인 할 수 있는 Dashboard 설치
 
 ```bash
 # dashboard
 kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
 ```
 
-- Dashboard 어플리케이션에 cluster-admin 부여 : 인증없이 접속 
+- Role을 부여하여 Token Key로 접속하는 방법이 있으나 어플리케이션에 cluster-admin 부여하여 인증없이 접속 
 	- [dashboard-admin.yaml](dashboard-admin.yaml)
 	- Apply the full admin privileges to dashboard service account using the dashboard-admin YAML file.
 
@@ -505,16 +509,9 @@ kubectl proxy --address=0.0.0.0 --accept-hosts=^*$
 
 - Dashboard 접속 : http://kube-master:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/
 
-
 ---
 
-#### ■ 기타
-
-```bash
-# docket build 
-docker build --tag mvcapp:0.1 .
-
-```
-
-
-
+### 추가작업 
+- Master Node 고가용성 확보 : 3대 NODE 구성
+- 버전 업그레이드 방법 
+ 
