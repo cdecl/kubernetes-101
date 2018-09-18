@@ -15,6 +15,13 @@ vi /etc/fstab
 # /dev/mapper/kube--master--vg-swap_1 none            swap    sw              0       0
 ```
 
+- SELinux, 방화벽 Disable
+```bash
+setenforce 0
+systemctl disable firewalld
+systemctl stop firewalld
+```
+
 - 브릿지 네트워크 할성화 
 
 ```bash
@@ -33,8 +40,32 @@ net/bridge/bridge-nf-call-arptables = 1
 
 ### 설치 및 설정
 
-#### ■ Kubernetes 설치 
+#### ■ Kubernetes 설치 : Centos7 기준
 - Kubernetes 버전에 맞는 Docker 버전을 확인해야 함 
+- Docker 설치 
+```bash
+yum install -y docker
+systemctl enable docker && systemctl start docker
+```
+
+- kubeadm, kubelet, kubectl : Repo 추가 및 패키지 설치
+```bash
+cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+exclude=kube*
+EOF
+
+
+yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+systemctl enable kubelet && systemctl start kubelet
+```
+
 - 설치 참고 : [Installing kubeadm](https://kubernetes.io/docs/setup/independent/install-kubeadm/) 
 
 #### ■ Master 초기화 : Kubernetes 의 Master 노드를 초기화 
