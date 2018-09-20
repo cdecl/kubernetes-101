@@ -76,6 +76,18 @@ sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 sudo systemctl enable kubelet && systemctl start kubelet
 ```
 
+- kubectl 자동완성
+```
+# bash
+source <(kubectl completion bash)
+echo "source <(kubectl completion bash)" >> ~/.bashrc 
+
+# zsh
+source <(kubectl completion zsh) 
+echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~/.zshrc 
+```
+
+
 - 설치 참고 : [Installing kubeadm](https://kubernetes.io/docs/setup/independent/install-kubeadm/) 
 
 #### ■ Master 초기화 : Kubernetes 의 Master 노드를 초기화 
