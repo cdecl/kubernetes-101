@@ -15,9 +15,19 @@ sudo vi /etc/fstab
 # /dev/mapper/kube--master--vg-swap_1 none            swap    sw              0       0
 ```
 
-- SELinux, 방화벽 Disable
+- SELinux Disable
 ```bash
+# 임시 
 sudo setenforce 0
+
+# 영구
+sudo vi /etc/sysconfig/selinux
+
+SELinux=disabled  
+```
+
+-  방화벽 Disable
+```
 sudo systemctl disable firewalld
 sudo systemctl stop firewalld
 ```
