@@ -25,8 +25,16 @@ systemctl stop firewalld
 - 브릿지 네트워크 할성화 
 
 ```bash
-vi /etc/ufw/sysctl.conf
+# Centos
+/etc/sysctl.d/k8s.conf
 
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+```
+
+```bash
+# Ubuntu
+vi /etc/ufw/sysctl.conf
 
 net/bridge/bridge-nf-call-ip6tables = 1
 net/bridge/bridge-nf-call-iptables = 1
