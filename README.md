@@ -566,6 +566,13 @@ kubectl proxy --address=0.0.0.0 --accept-hosts=^*$
 
 ---
 
+### Kubernetes 초기화 
+```
+sudo kubeadm reset -f
+```
+
+---
+
 ### 추가작업 
 - Master Node 고가용성 확보 : 3대 NODE 구성
 - 버전 업그레이드 방법 
