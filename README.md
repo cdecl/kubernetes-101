@@ -6,20 +6,20 @@
 
 ```bash
 # 일시적인 설정 
-swapoff -a
+sudo swapoff -a
 
 # 영구적인 설정 
 # 아래 swap 파일 시스템을 주석처리 
-vi /etc/fstab
+sudo vi /etc/fstab
 
 # /dev/mapper/kube--master--vg-swap_1 none            swap    sw              0       0
 ```
 
 - SELinux, 방화벽 Disable
 ```bash
-setenforce 0
-systemctl disable firewalld
-systemctl stop firewalld
+sudo setenforce 0
+sudo systemctl disable firewalld
+sudo systemctl stop firewalld
 ```
 
 - 브릿지 네트워크 할성화 
@@ -34,7 +34,7 @@ net.bridge.bridge-nf-call-iptables = 1
 
 ```bash
 # Ubuntu
-vi /etc/ufw/sysctl.conf
+sudo vi /etc/ufw/sysctl.conf
 
 net/bridge/bridge-nf-call-ip6tables = 1
 net/bridge/bridge-nf-call-iptables = 1
@@ -52,8 +52,10 @@ net/bridge/bridge-nf-call-arptables = 1
 - Kubernetes 버전에 맞는 Docker 버전을 확인해야 함 
 - Docker 설치 
 ```bash
-yum install -y docker
-systemctl enable docker && systemctl start docker
+sudo yum install -y docker
+sudo systemctl enable docker && systemctl start docker
+
+sudo usermod -aG docker $USER
 ```
 
 - kubeadm, kubelet, kubectl : Repo 추가 및 패키지 설치
@@ -70,8 +72,8 @@ exclude=kube*
 EOF
 
 
-yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
-systemctl enable kubelet && systemctl start kubelet
+sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+sudo systemctl enable kubelet && systemctl start kubelet
 ```
 
 - 설치 참고 : [Installing kubeadm](https://kubernetes.io/docs/setup/independent/install-kubeadm/) 
