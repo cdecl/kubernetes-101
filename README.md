@@ -68,12 +68,14 @@ enabled=1
 gpgcheck=1
 repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-exclude=kube*
 EOF
 
 
-sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+sudo yum install -y kubelet kubeadm kubectl
 sudo systemctl enable kubelet && systemctl start kubelet
+
+# 버전이 안맞을 경우 지정 
+# sudo yum install kubelet-1.11.3 kubeadm-1.11.3 kubectl-1.11.3
 ```
 
 - kubectl 자동완성
