@@ -1,0 +1,5 @@
+- name: ping 
+  hosts: kube
+  gather_facts: no
+  tasks:
+    - ping:
