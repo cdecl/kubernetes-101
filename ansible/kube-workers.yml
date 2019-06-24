@@ -1,5 +1,4 @@
 - hosts: kubem
-  become: yes
   gather_facts: false
   tasks:
     - name: get join command
@@ -15,7 +14,7 @@
   become: yes
   tasks:
     - name: join cluster
-      shell: "{{ hostvars['master'].join_command }} --ignore-preflight-errors all  >> node_joined.txt"
+      shell: "{{ hostvars['kubem'].join_command }} --ignore-preflight-errors all  >> node_joined.txt"
       args:
         chdir: $HOME
         creates: node_joined.txt
