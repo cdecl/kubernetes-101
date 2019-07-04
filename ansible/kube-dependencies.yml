@@ -1,4 +1,5 @@
 - hosts: kube
+  gather_facts: no
   become: yes
   tasks:
    - name: install Docker
@@ -31,6 +32,12 @@
       value: 1
       state: present
 
+   - name: ensure net.bridge.bridge-nf-call-arptables is set to 1
+     sysctl:
+      name: net.bridge.bridge-nf-call-arptables
+      value: 1
+      state: present
+
    - name: add Kubernetes' YUM repository
      yum_repository:
       name: Kubernetes
@@ -41,27 +48,35 @@
 
    - name: install kubelet
      yum:
-        name: kubelet-1.14.0
+        name: kubelet-1.15.0
         state: present
         update_cache: true
+     tags:
+       - kube
 
    - name: install kubeadm
      yum:
-        name: kubeadm-1.14.0
+        name: kubeadm-1.15.0
         state: present
+     tags:
+       - kube
 
    - name: start kubelet
      service:
        name: kubelet
        enabled: yes
        state: started
+     tags:
+       - kube
 
 - hosts: kubem
   become: yes
   tasks:
    - name: install kubectl
      yum:
-        name: kubectl-1.14.0
+        name: kubectl-1.15.0
         state: present
         allow_downgrade: yes
+     tags:
+       - kube
 

@@ -1,0 +1,36 @@
+- hosts: kubem
+  gather_facts: no
+  tasks:
+    - name: cleanup
+      become: yes
+      file: 
+        path: ~/cluster_initialized.txt
+        state: absent
+
+    - name: network cleanup
+      file: 
+        path: ~/pod_network_setup.txt
+        state: absent
+
+
+- hosts: kube0*
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: join cluster cleanup
+      file: 
+        path: ~/node_joined.txt
+        state: absent
+
+
+- hosts: kube*
+  gather_facts: no
+  tasks:
+    - name: reset
+      shell: kubeadm reset -f 
+      become: yes
+
+
+        
+
+
