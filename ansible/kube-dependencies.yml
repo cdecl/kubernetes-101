@@ -9,9 +9,10 @@
        update_cache: true
 
    - name: start Docker
-     service:
+     systemd:
        name: docker
        state: started
+       enabled: yes
 
 #   - name: disable SELinux
 #     command: setenforce 0
@@ -37,6 +38,15 @@
       name: net.bridge.bridge-nf-call-arptables
       value: 1
       state: present
+
+   - name: disable swap
+     shell: swapoff -a 
+
+   - name: disable swap
+     replace:  
+       path: /etc/fstab
+       regexp: '^(.+?\sswap\s+sw\s+.*)$'
+       replace: '# \1'
 
    - name: add Kubernetes' YUM repository
      yum_repository:

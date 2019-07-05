@@ -22,8 +22,8 @@
         remote_src: yes
 
     - name: install Pod network
-      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-      #shell: kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+      #shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      shell: kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
       args:
         chdir: $HOME
         creates: pod_network_setup.txt
