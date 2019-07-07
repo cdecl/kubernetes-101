@@ -30,6 +30,18 @@
       shell: kubeadm reset -f 
       become: yes
 
+- hosts: kubem
+  gather_facts: no
+  tasks:
+    - name: reset
+      shell: |
+        rm -rf /var/lib/cni/*
+        rm -rf /var/lib/kubelet/* 
+        rm -rf /etc/cni/* 
+        rm -rf /var/lib/etcd/*
+      become: yes
+      tags:
+        - rm 
 
         
 
