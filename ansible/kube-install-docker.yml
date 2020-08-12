@@ -1,0 +1,19 @@
+- hosts: kube
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: install yum utils
+      shell: yum install -y yum-utils
+
+    - name: set up the repository
+      shell: sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+          
+    - name: install docker
+      shell: yum install -y docker-ce-18.03.1.ce-1.el7.centos docker-ce-18.03.1.ce-cli-1.el7.centos containerd.io
+
+    - name: start Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+

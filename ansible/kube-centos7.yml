@@ -1,0 +1,47 @@
+- hosts: kube
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: disable SELinux on reboot
+      selinux:
+      state: disabled
+      tags:
+        - system
+
+    - name: ensure net.bridge.bridge-nf-call-ip6tables is set to 1
+      sysctl:
+        name: net.bridge.bridge-nf-call-ip6tables
+        value: 1
+        state: present
+      tags:
+        - system
+
+    - name: ensure net.bridge.bridge-nf-call-iptables is set to 1
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
+        state: present
+      tags:
+        - system
+
+    - name: ensure net.bridge.bridge-nf-call-arptables is set to 1
+      sysctl:
+        name: net.bridge.bridge-nf-call-arptables
+        value: 1
+        state: present
+      tags:
+        - system
+
+    - name: disable swap
+      shell: swapoff -a 
+      tags:
+        - system
+
+    - name: disable swap
+      replace:  
+        path: /etc/fstab
+        regexp: '^(.+?\sswap\s+sw\s+.*)$'
+        replace: '# \1'
+      tags:
+        - system
+

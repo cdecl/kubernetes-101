@@ -3,7 +3,6 @@
     - name: initialize the cluster
       become: yes
       shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors all >> cluster_initialized.txt
-      #shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors all >> cluster_initialized.txt
       args:
         chdir: $HOME
         creates: cluster_initialized.txt
@@ -23,7 +22,6 @@
 
     - name: install Pod network
       shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-      #shell: kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
       args:
         chdir: $HOME
         creates: pod_network_setup.txt
