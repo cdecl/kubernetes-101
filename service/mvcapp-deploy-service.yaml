@@ -6,15 +6,15 @@ spec:
   selector:
     matchLabels:
       app: mvcapp
-  replicas: 4 # tells deployment to run 2 pods matching the template
-  template: # create pods using pod definition in this template
+  replicas: 2 
+  template: 
     metadata:
       labels:
         app: mvcapp
     spec:
       containers:
       - name: mvcapp
-        image: cdecl/mvcapp:0.1
+        image: cdecl/mvcapp:0.3
         ports:
         - containerPort: 80
 
@@ -26,7 +26,7 @@ metadata:
 spec:
   #type: NodePort
   type: LoadBalancer
-  loadBalancerIP: 192.168.137.15
+  loadBalancerIP: 192.168.0.10
   selector:
     app: mvcapp
   ports:

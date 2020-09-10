@@ -37,7 +37,6 @@ metadata:
   name: kubernetes-dashboard
   namespace: kubernetes-dashboard
 spec:
-  type: LoadBalancer  
   ports:
     - port: 443
       targetPort: 8443
@@ -242,6 +241,8 @@ metadata:
   name: dashboard-metrics-scraper
   namespace: kubernetes-dashboard
 spec:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.0.15
   ports:
     - port: 8000
       targetPort: 8000
