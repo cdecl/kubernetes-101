@@ -11,11 +11,5 @@ spec:
       paths:               
       - backend:           
           serviceName: mvcapp
-          servicePort: 80
+          servicePort: 8001
 
-  - host: mvcapp2.cdecl.net     
-    http:
-      paths:               
-      - backend:           
-          serviceName: mvcapp2
-          servicePort: 80
