@@ -11,5 +11,5 @@ spec:
       paths:               
       - backend:           
           serviceName: mvcapp
-          servicePort: 8001
+          servicePort: 80
 

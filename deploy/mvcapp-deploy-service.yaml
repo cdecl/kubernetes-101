@@ -15,6 +15,7 @@ spec:
       containers:
       - name: mvcapp
         image: cdecl/mvcapp:0.3
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
 
@@ -30,6 +31,6 @@ spec:
   selector:
     app: mvcapp
   ports:
-  - port: 8001
+  - port: 80
     targetPort: 80
 
