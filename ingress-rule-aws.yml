@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: eks-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/target-type: ip  # ip, instance
+    alb.ingress.kubernetes.io/scheme: internet-facing # internal, internet-facing
+spec:
+  rules:
+  - host: mvcapp.cdecl.net     
+    http:
+      paths:               
+      - backend:           
+          serviceName: mvcapp
+          servicePort: 80
+
