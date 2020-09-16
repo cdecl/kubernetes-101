@@ -4,7 +4,7 @@ metadata:
   name: eks-ingress
   annotations:
     kubernetes.io/ingress.class: alb
-    alb.ingress.kubernetes.io/target-type: ip  # ip, instance
+    #alb.ingress.kubernetes.io/target-type: ip  # ip, instance
     alb.ingress.kubernetes.io/scheme: internet-facing # internal, internet-facing
 spec:
   rules:
