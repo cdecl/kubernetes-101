@@ -98,6 +98,135 @@ mvcapp       LoadBalancer   172.20.118.131   xxxxxxxxxx6e04139ba42fb06701c329-xx
 
 ```
 
+---
+
+### Ingress 설치 
+https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/alb-ingress.html
+
+#### 1. VPC의 서브넷에 태그를 지정, ALB 수신 컨트롤러 사용 알림
+#### 2. IAM OIDC 공급자를 생성하고 클러스터에 연결
+- 실패시 `IAMFullAccess` Role 추가 
+
+```sh
+$ eksctl utils associate-iam-oidc-provider 
+  --region ap-northeast-2 \
+  --cluster infra-eks-cdecl 
+  --approve
+```
+
+#### 3. `ALBIngressControllerIAMPolicy` 정책 생성 
+```sh
+$ curl -o iam-policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.8/docs/examples/iam-policy.json
+
+$ aws iam create-policy 
+    --policy-name ALBIngressControllerIAMPolicy \
+    --policy-document file://iam-policy.json
+```
+
+#### 4. rbac-role 추가  
+```sh
+$ kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.8/docs/examples/rbac-role.yaml
+```
+
+#### 5. ALB 수신 컨트롤러에 대한 IAM 역할을 생성
+
+```sh
+$ eksctl create iamserviceaccount \
+    --region ap-northeast-2 \
+    --name alb-ingress-controller \
+    --namespace kube-system \
+    --cluster infra-eks-cdecl \
+    --attach-policy-arn arn:aws:iam::xxxxxxxxxx47:policy/ALBIngressControllerIAMPolicy \
+    --override-existing-serviceaccounts \
+    --approve
+```
+
+#### 6. Ingress ALB 수신 컨트롤러 배포 
+```sh 
+# kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.8/docs/examples/alb-ingress-controller.yaml
+$ curl -O kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.8/docs/examples/alb-ingress-controller.yaml
+
+# 파일내 수정 
+# REQUIRED
+  # Name of your cluster. Used when naming resources created
+  # by the ALB Ingress Controller, providing distinction between
+  # clusters.
+  # - --cluster-name=devCluster
+  - --cluster-name=infra-eks-cdecl
+
+# ingress-controller 생성 
+$ kubectl apply -f alb-ingress-controller.yaml
+
+# ingress-controller 확인
+$ kubectl get pods -n kube-system
+NAME                                     READY   STATUS    RESTARTS   AGE
+alb-ingress-controller-8b8f79bb7-t5mwg   1/1     Running   0          10s
+aws-node-p8ppq                           1/1     Running   0          27h
+aws-node-qpg95                           1/1     Running   0          27h
+coredns-7dd7f84d9-bc4rd                  1/1     Running   0          28h
+coredns-7dd7f84d9-hntpx                  1/1     Running   0          28h
+kube-proxy-9kfz9                         1/1     Running   0          27h
+kube-proxy-fr4xt                         1/1     Running   0          27h
+```
+
+#### 7. 서비스 Deploy/Service 적용 
+- 서비스 타입 `NodePort` 구성 
+  - `LoadBalancer` 서비스 별 CBL 생성  
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mvcapp
+spec:
+  type: NodePort
+  #type: LoadBalancer
+  selector:
+    app: mvcapp
+  ports:
+  - port: 80
+    targetPort: 80
+```
+
+#### 8. Ingress 리소스 적용 
+- ALB 사용 Annotations 추가  
+
+```yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: eks-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    #alb.ingress.kubernetes.io/target-type: ip  # ip, instance
+    alb.ingress.kubernetes.io/scheme: internet-facing # internal, internet-facing
+spec:
+  rules:
+  - host: mvcapp.cdecl.net     
+    http:
+      paths:               
+      - backend:           
+          serviceName: mvcapp
+          servicePort: 80
+```
+
+```sh
+$ kubectl apply -f ingress-rule-aws.yml
+
+# 1분내 Adreess 할당 
+$ kubectl get ing
+NAME          HOSTS              ADDRESS   PORTS   AGE
+eks-ingress   mvcapp.cdecl.net             80      4s
+
+$ kubectl get ing
+NAME          HOSTS              ADDRESS                                                                       PORTS   AGE
+eks-ingress   mvcapp.cdecl.net   xxxxxxxx-default-eksingres-ea83-2001898420.ap-northeast-2.elb.amazonaws.com   80      21s
+
+$ curl xxxxxxxx-default-eksingres-ea83-2001898420.ap-northeast-2.elb.amazonaws.com -H 'Host: mvcapp.cdecl.net'
+```
+
+---
+
 ### 기타
 - 인스턴스 스펙 당 Pod 개수
 	- https://github.com/awslabs/amazon-eks-ami/blob/master/files/eni-max-pods.txt
