@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mvcapp
+spec:
+  selector:
+    matchLabels:
+      app: mvcapp
+  replicas: 2 
+  template: 
+    metadata:
+      labels:
+        app: mvcapp
+    spec:
+      containers:
+      - name: mvcapp
+        image: cdecl/mvcapp:0.3
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+
+
