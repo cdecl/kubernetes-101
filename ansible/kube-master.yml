@@ -1,4 +1,4 @@
-- hosts: kubem
+- hosts: master
   tasks:
     - name: initialize the cluster
       become: yes

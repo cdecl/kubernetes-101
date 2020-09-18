@@ -1,4 +1,4 @@
-- hosts: kubem
+- hosts: master
   gather_facts: no
   tasks:
     - name: cleanup
@@ -13,7 +13,7 @@
         state: absent
 
 
-- hosts: kube0*
+- hosts: worker
   gather_facts: no
   become: yes
   tasks:
@@ -23,14 +23,14 @@
         state: absent
 
 
-- hosts: kube*
+- hosts: all
   gather_facts: no
   tasks:
     - name: reset
       shell: kubeadm reset -f 
       become: yes
 
-- hosts: kubem
+- hosts: master
   gather_facts: no
   tasks:
     - name: reset

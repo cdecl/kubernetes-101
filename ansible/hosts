@@ -9,7 +9,7 @@
 #   - A hostname/ip can be a member of multiple groups
 
 [kube]
-kubem
-kube01
-kube02
+node1
+node2
+node3
 

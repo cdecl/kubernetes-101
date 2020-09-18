@@ -1,10 +1,10 @@
-- hosts: kube
+- hosts: all
   gather_facts: no
   become: yes
   tasks:
     - name: disable SELinux on reboot
       selinux:
-      state: disabled
+        state: disabled
       tags:
         - system
 
