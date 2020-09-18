@@ -15,7 +15,6 @@ spec:
       containers:
       - name: mvcapp
         image: cdecl/mvcapp:0.3
-        imagePullPolicy: Always
         ports:
         - containerPort: 80
 
@@ -25,16 +24,12 @@ kind: Service
 metadata:
   name: mvcapp
 spec:
-  type: NodePort
-  #type: LoadBalancer
-  #loadBalancerIP: 192.168.0.10
+  #type: NodePort
+  type: LoadBalancer
+  #loadBalancerIP: 192.168.137.15
   selector:
     app: mvcapp
   ports:
   - port: 8001
     targetPort: 80
-  externalIPs:
-    - 192.168.137.217
-    - 192.168.137.36
-    - 192.168.137.146
 
