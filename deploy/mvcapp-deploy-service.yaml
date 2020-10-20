@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mvcapp
-        image: cdecl/mvcapp:0.3
+        image: cdecl/mvcapp:0.4
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -31,10 +31,6 @@ spec:
   selector:
     app: mvcapp
   ports:
-  - port: 8001
+  - port: 80
     targetPort: 80
-  externalIPs:
-    - 192.168.137.217
-    - 192.168.137.36
-    - 192.168.137.146
-
+    nodePort: 30010

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mvcapp
-        image: cdecl/mvcapp:0.3
+        image: cdecl/mvcapp:0.4
         ports:
         - containerPort: 80
 

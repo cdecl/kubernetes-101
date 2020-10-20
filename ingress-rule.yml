@@ -6,8 +6,8 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host: mvcapp.cdecl.net     
-    http:
+#  - host: mvcapp.cdecl.net     
+   - http:
       paths:               
       - backend:           
           serviceName: mvcapp
