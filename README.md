@@ -364,6 +364,21 @@ deployment.apps "mvcapp" created
 service "mvcapp" created
 ```
 
+```sh
+$ kubectl get deploy -o wide
+NAME     READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES             SELECTOR
+mvcapp   2/2     2            2           4h47m   mvcapp       cdecl/mvcapp:0.3   app=mvcapp
+
+$ kubectl get po -o wide
+NAME                      READY   STATUS    RESTARTS   AGE   IP              NODE    NOMINATED NODE   READINESS GATES
+mvcapp-6b98dfc657-27zfr   1/1     Running   0          48m   10.244.135.18   node3   <none>           <none>
+mvcapp-6b98dfc657-p8hh4   1/1     Running   0          48m   10.244.104.27   node2   <none>           <none>
+
+$ kubectl k get svc -o wide
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE     SELECTOR
+mvcapp       NodePort    10.106.102.27   <none>        80:30010/TCP   4h47m   app=mvcapp
+```
+
 ---
 ## 서비스 노출 (AWS)
 
