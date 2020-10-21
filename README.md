@@ -1,25 +1,26 @@
-## Kubernetes 101 
+# Kubernetes 101 
 
 <!-- TOC -->
 
 - [Kubernetes 101](#kubernetes-101)
 	- [사전 준비](#%EC%82%AC%EC%A0%84-%EC%A4%80%EB%B9%84)
-		- [○ Kubernetes 설치 전 서버 구성 변경](#%E2%97%8B-kubernetes-%EC%84%A4%EC%B9%98-%EC%A0%84-%EC%84%9C%EB%B2%84-%EA%B5%AC%EC%84%B1-%EB%B3%80%EA%B2%BD)
+		- [Kubernetes 설치 전 서버 구성 변경](#kubernetes-%EC%84%A4%EC%B9%98-%EC%A0%84-%EC%84%9C%EB%B2%84-%EA%B5%AC%EC%84%B1-%EB%B3%80%EA%B2%BD)
 	- [설치 및 설정](#%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%84%A4%EC%A0%95)
-		- [○ Kubernetes 설치 : Centos7 기준](#%E2%97%8B-kubernetes-%EC%84%A4%EC%B9%98--centos7-%EA%B8%B0%EC%A4%80)
-		- [○ Master 초기화 : Kubernetes 의 Master 노드를 초기화](#%E2%97%8B-master-%EC%B4%88%EA%B8%B0%ED%99%94--kubernetes-%EC%9D%98-master-%EB%85%B8%EB%93%9C%EB%A5%BC-%EC%B4%88%EA%B8%B0%ED%99%94)
-		- [○ Overlay network : Calico 설치](#%E2%97%8B-overlay-network--calico-%EC%84%A4%EC%B9%98)
-		- [○ Worker Node 추가Join](#%E2%97%8B-worker-node-%EC%B6%94%EA%B0%80join)
-	- [서비스 배포 : 명령어 기반](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%B0%B0%ED%8F%AC--%EB%AA%85%EB%A0%B9%EC%96%B4-%EA%B8%B0%EB%B0%98)
-		- [○ 배포 / 서비스 추가](#%E2%97%8B-%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80)
-		- [○ Scale / 이미지 변경배포](#%E2%97%8B-scale--%EC%9D%B4%EB%AF%B8%EC%A7%80-%EB%B3%80%EA%B2%BD%EB%B0%B0%ED%8F%AC)
-	- [서비스 배포 :  yaml 파일 기반](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%B0%B0%ED%8F%AC---yaml-%ED%8C%8C%EC%9D%BC-%EA%B8%B0%EB%B0%98)
-		- [○ 배포 / 서비스 추가](#%E2%97%8B-%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80)
-	- [서비스 노출 Bare Metal 환경](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%85%B8%EC%B6%9C-bare-metal-%ED%99%98%EA%B2%BD)
-		- [○ Cloud AWS](#%E2%97%8B-cloud-aws)
-		- [○ MetalLB 활용 - Bare Metal 환경](#%E2%97%8B-metallb-%ED%99%9C%EC%9A%A9---bare-metal-%ED%99%98%EA%B2%BD)
-		- [○ Over a NodePort Service](#%E2%97%8B-over-a-nodeport-service)
-		- [○ Ingress controller](#%E2%97%8B-ingress-controller)
+		- [Kubernetes 설치 : Centos7 기준](#kubernetes-%EC%84%A4%EC%B9%98--centos7-%EA%B8%B0%EC%A4%80)
+		- [Master Node 설정](#master-node-%EC%84%A4%EC%A0%95)
+		- [Overlay network : Calico 설치](#overlay-network--calico-%EC%84%A4%EC%B9%98)
+		- [Worker Node 추가 Join](#worker-node-%EC%B6%94%EA%B0%80-join)
+	- [서비스 배포 : 명령어CLI 기반](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%B0%B0%ED%8F%AC--%EB%AA%85%EB%A0%B9%EC%96%B4cli-%EA%B8%B0%EB%B0%98)
+		- [배포 / 서비스 추가](#%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80)
+		- [Scale / 이미지 변경배포](#scale--%EC%9D%B4%EB%AF%B8%EC%A7%80-%EB%B3%80%EA%B2%BD%EB%B0%B0%ED%8F%AC)
+	- [서비스 배포 :  YAML 파일 기반](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%B0%B0%ED%8F%AC---yaml-%ED%8C%8C%EC%9D%BC-%EA%B8%B0%EB%B0%98)
+		- [배포 / 서비스 추가](#%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80)
+	- [서비스 노출 AWS](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%85%B8%EC%B6%9C-aws)
+		- [AWS](#aws)
+	- [서비스 노출 Bare Metal](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%85%B8%EC%B6%9C-bare-metal)
+		- [MetalLB 활용](#metallb-%ED%99%9C%EC%9A%A9)
+		- [NodePort : Over a NodePort Service](#nodeport--over-a-nodeport-service)
+		- [Ingress controller](#ingress-controller)
 		- [Ingress : MetalLB](#ingress--metallb)
 		- [Ingress : NodePort Port](#ingress--nodeport-port)
 		- [Ingress : Via the host network](#ingress--via-the-host-network)
@@ -29,8 +30,8 @@
 
 <!-- /TOC -->
 
-### 사전 준비 
-#### ○ Kubernetes 설치 전 서버 구성 변경 
+## 사전 준비 
+### Kubernetes 설치 전 서버 구성 변경 
 - Swap 영역을 비활성화 
 
 ```sh
@@ -85,10 +86,10 @@ net/bridge/bridge-nf-call-arptables = 1
 
 ---
 
-### 설치 및 설정
+## 설치 및 설정
+- 참고 : https://kubernetes.io/docs/setup/independent/install-kubeadm/
 
-#### ○ Kubernetes 설치 : Centos7 기준
-- Kubernetes 버전에 맞는 Docker 버전을 확인해야 함 
+### Kubernetes 설치 : Centos7 기준
 - Docker 설치 
 ```sh
 sudo yum install -y docker
@@ -128,28 +129,18 @@ source <(kubectl completion zsh)
 echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~/.zshrc 
 ```
 
-
-- 설치 참고 : [Installing kubeadm](https://kubernetes.io/docs/setup/independent/install-kubeadm/) 
-
-#### ○ Master 초기화 : Kubernetes 의 Master 노드를 초기화 
-- Kubernetes의 Master를 초기화 하려면 뒤에 설치할 Overlay network에 따른 옵션이 필요
-- Overlay network으로는 flannel 사용 
-	- 옵션에 네트워크 클래스 대역을 설정 필요 : `--pod-network-cidr 10.244.0.0/16`
+### Master Node 설정
 - Master 초기화
+  - 네트워크 클래스 대역을 설정 필요 : `--pod-network-cidr 10.244.0.0/16`
 ```sh
 sudo kubeadm init --pod-network-cidr 10.244.0.0/16
 ```
 
-- Master 초기화 이후 아래의 메세지 출력 
-	- mkdir로 시작하는 3줄 명령어는 kubectl 를 사용하기 위한 config 설정이므로 그대로 실행 
-	- 초기화를 한번이라도 했따면 2번째 cp 명령만 실행 해도 됨
-	- 마지막 `kubeadm join` 명령은 Master가 아닌 Worker Node 에서 Master 에 Join 하는 명령어 `나중에 실행 해야하므로 보관`
+- Kubectl 사용 : To start using your cluster.. 아래 항목 3줄 실행 
 	
 ```sh
 [init] Using Kubernetes version: v1.10.5
 ...
-...
-
 To start using your cluster, you need to run the following as a regular user:
 
   mkdir -p $HOME/.kube
@@ -157,14 +148,13 @@ To start using your cluster, you need to run the following as a regular user:
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 ...
-
 You can now join any number of machines by running the following on each node
 as root:
   kubeadm join 192.168.28.15:6443 --token 1ovd36.ft4mefr909iotg0a --discovery-token-ca-cert-hash sha256:82953a3ed178aa8c511792d0e21d9d3283e7575f3d3350a00bea3e34c2b87d29 
 ```
 
-- 초기화 이후 Pod 의 상태 확인하면 coredns 서비스가 Pending 상태 :
-  - Overlay network 설치 후 정상 
+- Pod 상태 확인 
+  - coredns STATUS → Pending  (∵  Overlay network 미설치)
 ```sh
 $ kubectl get po -A
 NAMESPACE     NAME                            READY   STATUS    RESTARTS   AGE
@@ -177,8 +167,7 @@ kube-system   kube-proxy-s582x                1/1     Running   0          19s
 kube-system   kube-scheduler-node1            1/1     Running   0          29s
 ```
 
-#### ○ Overlay network : Calico 설치
-- Kubernetes의 클러스터를 관리하기 위한 오버레이 네트워크 설치 
+### Overlay network : Calico 설치
 - Overlay network 종류 
   - https://kubernetes.io/docs/concepts/cluster-administration/networking/
 - Install Calico for on-premises deployments
@@ -189,8 +178,7 @@ kube-system   kube-scheduler-node1            1/1     Running   0          29s
 $ kubectl apply -f https://docs.projectcalico.org/manifests/calico-typha.yaml
 ```
 
-- 설치 이후 Pod 의 상태 확인하면 coredns 서비스가 정상적으로 Running 
-
+- coredns 서비스가 정상적으로 Running 
 ```sh
 $ kubectl get po -A
 NAMESPACE     NAME                                       READY   STATUS             RESTARTS   AGE
@@ -207,8 +195,8 @@ kube-system   kube-scheduler-node1                       1/1     Running        
 
 ```
 
-#### ○ Worker Node 추가(Join) 
-- Master가 아닌 다른 머신에서 실행 
+### Worker Node 추가 (Join) 
+- Worker Node 실행 
 
 ```sh
 # Join 명령 가져오기 
@@ -229,12 +217,12 @@ node3   Ready    <none>   16s     v1.18.6
 ```
 
 ---
-### 서비스 배포 : 명령어 기반 
+## 서비스 배포 : 명령어(CLI) 기반 
 
-#### ○ 배포 / 서비스 추가 
+### 배포 / 서비스 추가 
 - Docker 이미지를 빌드하여 Docker Hub에 업로드 : 서비스에는 Private Hub 구성 필요 
-	- run 명령으로 Pod, Deployment 생성 
-	- expose 명령으로 Deployment 기준으로 서비스 생성 
+	- kubectl create deployment 명령으로 Pod, Deployment 생성 
+	- kubectl expose 명령으로 Deployment 기준으로 서비스 생성 
   - [Kubernetes NodePort vs LoadBalancer vs Ingress? When should I use what?](https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0)
 
 
@@ -272,7 +260,7 @@ $ curl localhost:31521
 ...
 ```
 
-#### ○ Scale / 이미지 변경(배포)
+### Scale / 이미지 변경(배포)
 
 - Scale(노드개수) 조정 
 
@@ -322,9 +310,9 @@ deployment.apps/mvcapp rolled back
 ```
 
 ---
-### 서비스 배포 :  yaml 파일 기반 
+## 서비스 배포 :  YAML 파일 기반 
 
-#### ○ 배포 / 서비스 추가  
+### 배포 / 서비스 추가  
 - 정책을 정의한 yaml 기반 정의 
 - NodePort 기반의 Deployment 및 서비스 정의 
 
@@ -369,31 +357,19 @@ spec:
 - yaml 파일 적용 
 
 ```sh
-
-# yaml 파일 적용(생성)
-kubectl create -f mvcapp-deploy-service.yaml
-
-# yaml 파일 갱신 
-# 파일 수정 후, apply 를 하게 되면  set image, replicas 등과 같이 정책 변경이 가능함 
-kubectl apply -f mvcapp-deploy-service.yaml
-``` 
-
-```sh
-
-> kubectl apply -f mvcapp-deploy-service.yaml
+# yaml 파일 적용 
+$ kubectl apply -f mvcapp-deploy-service.yaml
 deployment.apps "mvcapp" created
 service "mvcapp" created
-
 ```
 
 ---
-### 서비스 노출 (Bare Metal 환경) 
-- https://kubernetes.github.io/ingress-nginx/deploy/baremetal/
+## 서비스 노출 (AWS)
 
-
-#### ○ Cloud (AWS)
+### AWS 
 - type: LoadBalancer : 서비스 타입을 LoadBalancer 지정하면 EXTERNAL-IP 자동으로 할당 
 - Ingress 활용 : annotations 을 통해 alb 할당
+- [EKS 클러스터 생성 및 Ingress](eks/README.md)
 
 ```yaml
 apiVersion: networking.k8s.io/v1beta1
@@ -414,7 +390,10 @@ spec:
           servicePort: 80
 ```
 
-#### ○ MetalLB 활용 - Bare Metal 환경 
+## 서비스 노출 (Bare Metal) 
+- https://kubernetes.github.io/ingress-nginx/deploy/baremetal/
+
+### MetalLB 활용 
 ![](https://kubernetes.github.io/ingress-nginx/images/baremetal/metallb.jpg)
 
 - 설치 : https://metallb.universe.tf/installation/#installation-by-manifest
@@ -462,7 +441,7 @@ spec:
 $ curl 192.168.28.100
 ```
 
-#### ○ Over a NodePort Service
+### NodePort : Over a NodePort Service
 ![](https://kubernetes.github.io/ingress-nginx/images/baremetal/nodeport.jpg)
 
 - Nodeport 에서 자동으로 할당한 30000 over port 활용 
@@ -507,7 +486,7 @@ tcp        0      0 192.168.28.15:80        0.0.0.0:*               LISTEN
 
 ---
 
-#### ○ Ingress controller 
+### Ingress controller 
 - 외부 서비스 접속을 위한 도메인, URL 기반 서비스 분기 역할 `L7 레이어 기능`
 - RBAC 기반 설치 : 역할 기반 접근 제어(role-based access control)
 - 그중 가장 많이 활성화 된 nginx 기반 Ingress 컨트롤러 이용 
@@ -563,10 +542,14 @@ NAME           CLASS    HOSTS   ADDRESS         PORTS   AGE
 main-ingress   <none>   *       192.168.28.16   80      25s
 ```
 
-#### Ingress : MetalLB
+### Ingress : MetalLB
+![](https://kubernetes.github.io/ingress-nginx/images/baremetal/metallb.jpg)
+
 - Ingress 서비스를 type: LoadBalancer 으로 설정 → MetalLB
 
-#### Ingress : NodePort Port 
+### Ingress : NodePort Port 
+![](https://kubernetes.github.io/ingress-nginx/images/baremetal/nodeport.jpg)
+
 - ingress-nginx ingress-nginx-controller NodePort 10.111.152.85 <none> 80:**32293**/TCP,443:**32325**/TCP   3m56s
 ```
 $ kubectl get svc -A
@@ -577,7 +560,7 @@ ingress-nginx   ingress-nginx-controller             NodePort    10.111.152.85  
 ...
 ```
 
-#### Ingress : Via the host network
+### Ingress : Via the host network
 ![](https://kubernetes.github.io/ingress-nginx/images/baremetal/hostnetwork.jpg)
 - Deploy hostNetwork: true 설정  
   - Ingress Bind IP 만 설정됨 (Not DaemonSet)
@@ -612,7 +595,7 @@ node1 | FAILED | rc=1 >>
 non-zero return code
 ```
 
-#### Ingress : External IPs
+### Ingress : External IPs
 - This method does not allow preserving the source IP of HTTP requests in any manner, it is therefore not recommended to use it despite its apparent simplicity.
 - 일반적으로 권고하지 않음 
 
@@ -672,14 +655,14 @@ tcp        0      0 192.168.28.16:80        0.0.0.0:*               LISTEN
 
 ---
 
-### Kubernetes 초기화 
+## Kubernetes 초기화 
 ```
 sudo kubeadm reset -f
 ```
 
 ---
 
-### 추가작업 
+## 추가작업 
 - Master Node 고가용성 확보 : 3대 NODE 구성
 - 버전 업그레이드 방법 
  
