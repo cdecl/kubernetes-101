@@ -20,6 +20,7 @@
 	- [서비스 노출 Bare Metal](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%85%B8%EC%B6%9C-bare-metal)
 		- [MetalLB 활용](#metallb-%ED%99%9C%EC%9A%A9)
 		- [NodePort : Over a NodePort Service](#nodeport--over-a-nodeport-service)
+		- [External IPs](#external-ips)
 		- [Ingress controller](#ingress-controller)
 		- [Ingress : MetalLB](#ingress--metallb)
 		- [Ingress : NodePort Port](#ingress--nodeport-port)
@@ -445,7 +446,6 @@ $ curl 192.168.28.100
 ![](https://kubernetes.github.io/ingress-nginx/images/baremetal/nodeport.jpg)
 
 - Nodeport 에서 자동으로 할당한 30000 over port 활용 
-  - mvcapp       NodePort    10.107.145.24   <none>        80:**30010**/TCP   26m
 
 ```yml
 apiVersion: v1
@@ -463,12 +463,20 @@ spec:
 ```
 
 ```sh
+# PORT(S) 확인
+$ kubectl get svc 
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+mvcapp       NodePort    10.106.102.27   <none>        80:30010/TCP   128m
+
 # Master 및 Worker IP 
 $ curl localhost:30010
 $ curl 192.168.28.16:30010
 ```
 
-- externalIPs 사용 : 일반적으로 권고하지 않음 
+### External IPs 
+- 일반적으로 권고하지 않음 
+- 서비스에 externalIPs 를 설정하여 서비스 노출
+
 ```yml
 spec:
   externalIPs:
@@ -479,9 +487,15 @@ spec:
 
 ```sh
 $ netstat -an | grep 'LISTEN '
-...
 tcp        0      0 192.168.28.15:80        0.0.0.0:*               LISTEN 
-...
+
+$ ansible all -m shell -a "netstat -an | grep 'LISTEN ' | grep ':80' "
+node3 | CHANGED | rc=0 >>
+tcp        0      0 192.168.28.17:80        0.0.0.0:*               LISTEN     
+node1 | CHANGED | rc=0 >>
+tcp        0      0 192.168.28.15:80        0.0.0.0:*               LISTEN     
+node2 | CHANGED | rc=0 >>
+tcp        0      0 192.168.28.16:80        0.0.0.0:*               LISTEN   
 ```
 
 ---
