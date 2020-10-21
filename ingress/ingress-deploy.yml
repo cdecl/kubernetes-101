@@ -297,9 +297,9 @@ spec:
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/component: controller
   externalIPs:
-    - 192.168.137.217
-    - 192.168.137.36
-    - 192.168.137.146
+    - node1
+    - node2
+    - node3
 
 ---
 # Source: ingress-nginx/templates/controller-deployment.yaml
