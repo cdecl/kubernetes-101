@@ -17,6 +17,7 @@
 		- [배포 / 서비스 추가](#%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80)
 	- [서비스 노출 AWS](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%85%B8%EC%B6%9C-aws)
 		- [AWS](#aws)
+			- [AWS Ingress](#aws-ingress)
 	- [서비스 노출 Bare Metal](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%85%B8%EC%B6%9C-bare-metal)
 		- [MetalLB 활용](#metallb-%ED%99%9C%EC%9A%A9)
 		- [NodePort : Over a NodePort Service](#nodeport--over-a-nodeport-service)
@@ -387,6 +388,30 @@ mvcapp       NodePort    10.106.102.27   <none>        80:30010/TCP   4h47m   ap
 - Ingress 활용 : annotations 을 통해 alb 할당
 - [EKS 클러스터 생성 및 Ingress](eks/README.md)
 
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mvcapp
+spec:
+  type: LoadBalancer  # ←
+  selector:
+    app: mvcapp
+  ports:
+  - port: 80
+    targetPort: 80
+```
+
+```sh
+$ kubectl get svc -o wide
+NAME         TYPE           CLUSTER-IP    EXTERNAL-IP                                     PORT(S)        AGE   SELECTOR
+mvcapp       LoadBalancer   172.20.9.13   xx-651061089.ap-northeast-2.elb.amazonaws.com   80:30731/TCP   30d   app=mvcapp
+
+```
+
+#### AWS Ingress 
+
 ```yaml
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
@@ -405,6 +430,14 @@ spec:
           serviceName: mvcapp
           servicePort: 80
 ```
+
+```sh
+$ kubectl get ing -o wide
+NAME          HOSTS   ADDRESS                                                      PORTS   AGE
+eks-ingress   *       xx-default-eksingres-ea83.ap-northeast-2.elb.amazonaws.com   80      30d
+```
+
+
 
 ## 서비스 노출 (Bare Metal) 
 - Bare-metal considerations : https://kubernetes.github.io/ingress-nginx/deploy/baremetal/
