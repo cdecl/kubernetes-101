@@ -392,7 +392,8 @@ spec:
 ```
 
 ## 서비스 노출 (Bare Metal) 
-- https://kubernetes.github.io/ingress-nginx/deploy/baremetal/
+- Bare-metal considerations : https://kubernetes.github.io/ingress-nginx/deploy/baremetal/
+- 쿠버네티스 네트워킹 이해하기 : https://coffeewhale.com/k8s/network/2019/05/30/k8s-network-03/
 
 ### MetalLB 활용 
 ![](https://kubernetes.github.io/ingress-nginx/images/baremetal/metallb.jpg)
