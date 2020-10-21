@@ -17,11 +17,12 @@
       become: yes
       copy:
         src: /etc/kubernetes/admin.conf
-        dest: /home/cdecl/.kube/config
+        dest: $HOME/.kube/config
         remote_src: yes
 
     - name: install Pod network
-      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      #shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico-typha.yaml
       args:
         chdir: $HOME
         creates: pod_network_setup.txt
