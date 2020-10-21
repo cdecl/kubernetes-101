@@ -1,4 +1,33 @@
-## Kubernetes 설정 
+## Kubernetes 101 
+
+<!-- TOC -->
+
+- [Kubernetes 101](#kubernetes-101)
+	- [사전 준비](#%EC%82%AC%EC%A0%84-%EC%A4%80%EB%B9%84)
+		- [○ Kubernetes 설치 전 서버 구성 변경](#%E2%97%8B-kubernetes-%EC%84%A4%EC%B9%98-%EC%A0%84-%EC%84%9C%EB%B2%84-%EA%B5%AC%EC%84%B1-%EB%B3%80%EA%B2%BD)
+	- [설치 및 설정](#%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%84%A4%EC%A0%95)
+		- [○ Kubernetes 설치 : Centos7 기준](#%E2%97%8B-kubernetes-%EC%84%A4%EC%B9%98--centos7-%EA%B8%B0%EC%A4%80)
+		- [○ Master 초기화 : Kubernetes 의 Master 노드를 초기화](#%E2%97%8B-master-%EC%B4%88%EA%B8%B0%ED%99%94--kubernetes-%EC%9D%98-master-%EB%85%B8%EB%93%9C%EB%A5%BC-%EC%B4%88%EA%B8%B0%ED%99%94)
+		- [○ Overlay network : Calico 설치](#%E2%97%8B-overlay-network--calico-%EC%84%A4%EC%B9%98)
+		- [○ Worker Node 추가Join](#%E2%97%8B-worker-node-%EC%B6%94%EA%B0%80join)
+	- [서비스 배포 : 명령어 기반](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%B0%B0%ED%8F%AC--%EB%AA%85%EB%A0%B9%EC%96%B4-%EA%B8%B0%EB%B0%98)
+		- [○ 배포 / 서비스 추가](#%E2%97%8B-%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80)
+		- [○ Scale / 이미지 변경배포](#%E2%97%8B-scale--%EC%9D%B4%EB%AF%B8%EC%A7%80-%EB%B3%80%EA%B2%BD%EB%B0%B0%ED%8F%AC)
+	- [서비스 배포 :  yaml 파일 기반](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%B0%B0%ED%8F%AC---yaml-%ED%8C%8C%EC%9D%BC-%EA%B8%B0%EB%B0%98)
+		- [○ 배포 / 서비스 추가](#%E2%97%8B-%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80)
+	- [서비스 노출 Bare Metal 환경](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%85%B8%EC%B6%9C-bare-metal-%ED%99%98%EA%B2%BD)
+		- [○ Cloud AWS](#%E2%97%8B-cloud-aws)
+		- [○ MetalLB 활용 - Bare Metal 환경](#%E2%97%8B-metallb-%ED%99%9C%EC%9A%A9---bare-metal-%ED%99%98%EA%B2%BD)
+		- [○ Over a NodePort Service](#%E2%97%8B-over-a-nodeport-service)
+		- [○ Ingress controller](#%E2%97%8B-ingress-controller)
+		- [Ingress : MetalLB](#ingress--metallb)
+		- [Ingress : NodePort Port](#ingress--nodeport-port)
+		- [Ingress : Via the host network](#ingress--via-the-host-network)
+		- [Ingress : External IPs](#ingress--external-ips)
+	- [Kubernetes 초기화](#kubernetes-%EC%B4%88%EA%B8%B0%ED%99%94)
+	- [추가작업](#%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85)
+
+<!-- /TOC -->
 
 ### 사전 준비 
 #### ○ Kubernetes 설치 전 서버 구성 변경 
