@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: asb
+spec:
+  completions: 4
+  parallelism: 4
+  template:
+    spec:
+      containers:
+      - name: asb
+        image: cdecl/asb
+        command: ["asb", "-d", "10", "10.106.102.27"]
+      restartPolicy: Never
+  backoffLimit: 4
+
