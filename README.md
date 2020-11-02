@@ -11,7 +11,7 @@
 		- [Overlay network : Calico 설치](#overlay-network--calico-%EC%84%A4%EC%B9%98)
 		- [Worker Node 추가 Join](#worker-node-%EC%B6%94%EA%B0%80-join)
 	- [서비스 배포 : 명령어CLI 기반](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%B0%B0%ED%8F%AC--%EB%AA%85%EB%A0%B9%EC%96%B4cli-%EA%B8%B0%EB%B0%98)
-		- [배포 / 서비스 추가](#%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80)
+		- [배포 / 서비스 추가 Deployment/ReplicaSet](#%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80-deploymentreplicaset)
 		- [Scale / 이미지 변경배포](#scale--%EC%9D%B4%EB%AF%B8%EC%A7%80-%EB%B3%80%EA%B2%BD%EB%B0%B0%ED%8F%AC)
 	- [서비스 배포 :  YAML 파일 기반](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%B0%B0%ED%8F%AC---yaml-%ED%8C%8C%EC%9D%BC-%EA%B8%B0%EB%B0%98)
 		- [배포 / 서비스 추가](#%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80)
@@ -27,6 +27,9 @@
 		- [Ingress : NodePort Port](#ingress--nodeport-port)
 		- [Ingress : Via the host network](#ingress--via-the-host-network)
 		- [Ingress : External IPs](#ingress--external-ips)
+	- [기타 Network 분석](#%EA%B8%B0%ED%83%80-network-%EB%B6%84%EC%84%9D)
+		- [K8S Network](#k8s-network)
+		- [EKS ALB](#eks-alb)
 	- [Kubernetes 초기화](#kubernetes-%EC%B4%88%EA%B8%B0%ED%99%94)
 	- [추가작업](#%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85)
 
@@ -220,8 +223,9 @@ node3   Ready    <none>   16s     v1.18.6
 
 ---
 ## 서비스 배포 : 명령어(CLI) 기반 
+![](https://subicura.com/assets/article_images/2019-05-19-kubernetes-basic-1/workload.png)
 
-### 배포 / 서비스 추가 
+### 배포 / 서비스 추가 (Deployment/ReplicaSet)
 - Docker 이미지를 빌드하여 Docker Hub에 업로드 : 서비스에는 Private Hub 구성 필요 
 	- kubectl create deployment 명령으로 Pod, Deployment 생성 
 	- kubectl expose 명령으로 Deployment 기준으로 서비스 생성 
@@ -715,6 +719,19 @@ tcp        0      0 192.168.28.15:80        0.0.0.0:*               LISTEN
 node2 | CHANGED | rc=0 >>
 tcp        0      0 192.168.28.16:80        0.0.0.0:*               LISTEN     
 ```
+---
+## 기타 Network 분석
+
+###  K8S Network
+![image](https://user-images.githubusercontent.com/5927142/97154892-dbdbc800-17b7-11eb-83fc-91597588eeaa.png)
+
+![image](https://user-images.githubusercontent.com/5927142/97154530-5526eb00-17b7-11eb-86be-1a260cb0291e.png)
+
+--- 
+
+### EKS ALB 
+![image](https://user-images.githubusercontent.com/5927142/97155321-8a800880-17b8-11eb-85ed-82c1abbd62ed.png)
+
 
 ---
 
