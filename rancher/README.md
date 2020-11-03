@@ -2,6 +2,30 @@
 # Rancher Kubernetes 설치 
 Docker 및 Kubernetes 클러스터를 포함한 컨테이너를 관리하기 위한 플랫폼
 
+
+<!-- TOC -->
+
+- [Rancher Kubernetes 설치](#rancher-kubernetes-%EC%84%A4%EC%B9%98)
+	- [설치](#%EC%84%A4%EC%B9%98)
+		- [설정](#%EC%84%A4%EC%A0%95)
+			- [패스워드 설정](#%ED%8C%A8%EC%8A%A4%EC%9B%8C%EB%93%9C-%EC%84%A4%EC%A0%95)
+			- [URL 설정](#url-%EC%84%A4%EC%A0%95)
+			- [Add Cluster 선택](#add-cluster-%EC%84%A0%ED%83%9D)
+			- [Cluster 세팅](#cluster-%EC%84%B8%ED%8C%85)
+		- [스크립트 생성 추출 : Node Run Command](#%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8-%EC%83%9D%EC%84%B1-%EC%B6%94%EC%B6%9C--node-run-command)
+			- [Master Node](#master-node)
+			- [Worker Node](#worker-node)
+		- [Cluster 확인](#cluster-%ED%99%95%EC%9D%B8)
+			- [Cluster 대시보드](#cluster-%EB%8C%80%EC%8B%9C%EB%B3%B4%EB%93%9C)
+			- [Dashboard: glass : glass 선택](#dashboard-glass--glass-%EC%84%A0%ED%83%9D)
+			- [Launch kubectl](#launch-kubectl)
+			- [CLI 환경을 위한 config 파일 설정 : Kubeconfig File](#cli-%ED%99%98%EA%B2%BD%EC%9D%84-%EC%9C%84%ED%95%9C-config-%ED%8C%8C%EC%9D%BC-%EC%84%A4%EC%A0%95--kubeconfig-file)
+			- [Pods 확인](#pods-%ED%99%95%EC%9D%B8)
+		- [Cluster Explorer](#cluster-explorer)
+
+<!-- /TOC -->
+
+
 ## 설치 
 - https://rancher.com/quick-start/
 
@@ -136,3 +160,8 @@ kube-system     rke-ingress-controller-deploy-job-z6j7r   0/1     Completed   0 
 kube-system     rke-metrics-addon-deploy-job-dz99w        0/1     Completed   0          18m
 kube-system     rke-network-plugin-deploy-job-df8mb       0/1     Completed   0          18m
 ```
+
+### Cluster Explorer
+- Cluster 내 자원 모니터링 대시보드 
+
+![](images/2020-11-03-14-56-18.png)
