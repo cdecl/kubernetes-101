@@ -6,17 +6,18 @@ Docker 및 Kubernetes 클러스터를 포함한 컨테이너를 관리하기 위
 - https://rancher.com/quick-start/
 
 ```sh
+# 설치를 위한 WEB UI 설치 
 $ sudo docker run --privileged -d --restart=unless-stopped -p 80:80 -p 443:443 rancher/rancher
 3137e4f80eb95956cc4e1af6b07df9a69e4708c6836aed1a8b3d093c8b190b7d
 
-docker ps
+# 실행 확인
+$ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                                      NAMES
 3137e4f80eb9        rancher/rancher     "entrypoint.sh"     4 seconds ago       Up 3 seconds        0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp   priceless_gates
 ```
 
 ### 설정 
-- WEB UI 접속 
-- https://192.168.28.15/
+- WEB UI 접속 (https)
 
 #### 패스워드 설정 
 
@@ -26,15 +27,15 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 
 ![](images/2020-11-03-13-48-52.png)
 
-#### Add Cluster 
+#### Add Cluster 선택
 - Existing Node 선택 
   - 기 구성된 Kubernetes Cluster 가 있다면 `Other Cluster` 옵션으로 Import 
 
 ![](images/2020-11-03-13-50-05.png)
 
 #### Cluster 세팅 
-  - Cluster Name 
-  - Network Provider는 익숙한 Calico 수정 (Option) : Next
+- Cluster Name 
+- Network Provider는 익숙한 Calico 수정 (Option) : Next
 
 ![](images/2020-11-03-13-53-21.png)
 
