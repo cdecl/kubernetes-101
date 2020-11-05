@@ -37,6 +37,12 @@ Kubernetes 설치 및 운영 101
 		- [K8S Network](#k8s-network)
 		- [EKS ALB](#eks-alb)
 	- [Kubernetes 초기화](#kubernetes-%EC%B4%88%EA%B8%B0%ED%99%94)
+	- [고가용성 토폴로지 HA 구성](#%EA%B3%A0%EA%B0%80%EC%9A%A9%EC%84%B1-%ED%86%A0%ED%8F%B4%EB%A1%9C%EC%A7%80-ha-%EA%B5%AC%EC%84%B1)
+		- [중첩된 etcd 토플로지 Stacked etcd](#%EC%A4%91%EC%B2%A9%EB%90%9C-etcd-%ED%86%A0%ED%94%8C%EB%A1%9C%EC%A7%80-stacked-etcd)
+			- [Master Node 설정](#master-node-%EC%84%A4%EC%A0%95)
+		- [HA에서 control plane 노드 제거](#ha%EC%97%90%EC%84%9C-control-plane-%EB%85%B8%EB%93%9C-%EC%A0%9C%EA%B1%B0)
+			- [Nginx 정보 참고](#nginx-%EC%A0%95%EB%B3%B4-%EC%B0%B8%EA%B3%A0)
+		- [외부 etcd 토플로지 External etcd](#%EC%99%B8%EB%B6%80-etcd-%ED%86%A0%ED%94%8C%EB%A1%9C%EC%A7%80-external-etcd)
 	- [추가작업](#%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85)
 
 <!-- /TOC -->
@@ -793,7 +799,92 @@ sudo kubeadm reset -f
 
 ---
 
+## 고가용성 토폴로지 (HA) 구성
+- https://kubernetes.io/ko/docs/setup/production-environment/tools/kubeadm/ha-topology/
+
+
+### 중첩된 etcd 토플로지 (Stacked etcd)
+- 컨트롤 플레인(--control-plane) 구성 요소를 실행하는 kubeadm 관리되는 노드 추가
+
+#### Master Node 설정
+- Single Master 구성에서 옵션 추가 필요  
+  - kube-apiserver 를 위한 load balancer 구성 필요 
+  - `--control-plane-endpoint "LOAD_BALANCER_IP:PORT"` 
+  - `--upload-certs` : 인증서를 업로드 (자동배포)
+
+```sh 
+# kube01
+$ kubeadm init --pod-network-cidr 10.244.0.0/16 --control-plane-endpoint "10.239.36.184:6443" --upload-certs
+...
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+...
+You can now join any number of the control-plane node running the following command on each as root:
+
+  kubeadm join 10.239.36.184:6443 --token 62f4ot.y6c026tnpxmanqrk \
+    --discovery-token-ca-cert-hash sha256:5c7b19f57085d582d216681924a869a3fa66dd042f55fdfd3c7ac32115f01c18 \
+    --control-plane --certificate-key 11f38363a6f08d6d89e8b37a00599a0ffbd9a5210d86b9709ffed7249af23716
+...
+kubeadm join 10.239.36.184:6443 --token 62f4ot.y6c026tnpxmanqrk \
+    --discovery-token-ca-cert-hash sha256:5c7b19f57085d582d216681924a869a3fa66dd042f55fdfd3c7ac32115f01c18 
+```
+
+- control-plane join 명렁어 추가됨 
+```sh
+# kube04 
+$ kubeadm join 10.239.36.184:6443 --token 62f4ot.y6c026tnpxmanqrk \
+    --discovery-token-ca-cert-hash sha256:5c7b19f57085d582d216681924a869a3fa66dd042f55fdfd3c7ac32115f01c18 \
+    --control-plane --certificate-key 11f38363a6f08d6d89e8b37a00599a0ffbd9a5210d86b9709ffed7249af23716
+```
+
+```sh
+$ kubectl get node 
+NAME     STATUS   ROLES    AGE     VERSION
+kube01   Ready    master   8m58s   v1.19.3
+kube02   Ready    <none>   5m      v1.19.3
+kube03   Ready    <none>   4m50s   v1.19.3
+kube04   Ready    master   2m7s    v1.19.3
+```
+
+
+### HA에서 control plane 노드 제거
+- 제거 할 노드에서 reset 명령 실행 
+```sh
+# kube04 
+$ sudo kubeadm reset
+```
+
+> - kubectl delete node로 control plane노드 를 제거하지 않도록 한다.  
+> - 만약 kubectl delete node로 삭제하는 경우 이후 추가 되는 control plane 노드들은 HA에 추가 될수 없다. 
+> - 그 이유는 kubeadm reset은 HA내 다른 control plane 노드의 etcd에서 etcd endpoint 정보를 지우지만 kubectl delete node는 HA 내의 다른 controle plane 노드에서 etcd endpoint 정보를 지우지 못하기 때문이다.  
+> - 이로 인해 이후 HA에 추가되는 control plane 노드는 삭제된 노드의 etcd endpoint 접속이 되지 않기 때문에 etcd 유효성 검사 과정에서 오류가 발생하게 된다.   
+> - 참고 : https://fliedcat.tistory.com/170
+
+#### Nginx 정보 (참고)
+- Load balancer 구성을 위한 reverse proxy 세팅
+```
+# /etc/nginx/nginx.conf
+
+stream {
+    upstream kube {
+        server kube01:6443;
+        server kube04:6443;
+    }
+    server {
+        listen 6443;
+        proxy_pass kube;
+    } 
+}
+```
+
+
+### 외부 etcd 토플로지 (External etcd)
+- 별도의 서버를 통해 etcd 서비스를 분산하는 방법 
+- 이 토플로지는 중첩된 토플로지에 비해 호스트 개수가 두배나 필요하다. 이 토플로지로 HA 클러스터를 구성하기 위해서는 최소한 3개의 컨트롤 플레인과 3개의 etcd 노드가 필요하다.
+
+
+---
 ## 추가작업 
-- Master Node 고가용성 확보 : 3대 NODE 구성
 - 버전 업그레이드 방법 
  
