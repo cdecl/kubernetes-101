@@ -9,8 +9,9 @@ Kubernetes 설치 및 운영 101
 	- [사전 준비](#%EC%82%AC%EC%A0%84-%EC%A4%80%EB%B9%84)
 		- [Kubernetes 설치 전 서버 구성 변경](#kubernetes-%EC%84%A4%EC%B9%98-%EC%A0%84-%EC%84%9C%EB%B2%84-%EA%B5%AC%EC%84%B1-%EB%B3%80%EA%B2%BD)
 		- [Cgroup 드라이버 이슈](#cgroup-%EB%93%9C%EB%9D%BC%EC%9D%B4%EB%B2%84-%EC%9D%B4%EC%8A%88)
-	- [설치 및 설정](#%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%84%A4%EC%A0%95)
+	- [Kubernetes kubeadm, kubelet, kubectl 설치](#kubernetes-kubeadm-kubelet-kubectl-%EC%84%A4%EC%B9%98)
 		- [Kubernetes 설치 : Centos7 기준](#kubernetes-%EC%84%A4%EC%B9%98--centos7-%EA%B8%B0%EC%A4%80)
+	- [Master Node Init 및 Worker Node Join](#master-node-init-%EB%B0%8F-worker-node-join)
 		- [Master Node 설정](#master-node-%EC%84%A4%EC%A0%95)
 		- [Overlay network : Calico 설치](#overlay-network--calico-%EC%84%A4%EC%B9%98)
 		- [Worker Node 추가 Join](#worker-node-%EC%B6%94%EA%B0%80-join)
@@ -138,7 +139,7 @@ $ sudo docker info | grep -i cgroup
 
 ---
 
-## 설치 및 설정
+## Kubernetes (kubeadm, kubelet, kubectl) 설치
 - 참고 : https://kubernetes.io/docs/setup/independent/install-kubeadm/
 
 ### Kubernetes 설치 : Centos7 기준
@@ -180,6 +181,8 @@ echo "source <(kubectl completion sh)" >> ~/.shrc
 source <(kubectl completion zsh) 
 echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~/.zshrc 
 ```
+
+## Master Node Init 및 Worker Node Join 
 
 ### Master Node 설정
 - Master 초기화
