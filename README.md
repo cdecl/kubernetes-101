@@ -6,6 +6,7 @@ Kubernetes 설치 및 운영 101
 
 - [Kubernetes 101](#kubernetes-101)
 	- [Table of Contents](#table-of-contents)
+	- [](#)
 	- [사전 준비](#%EC%82%AC%EC%A0%84-%EC%A4%80%EB%B9%84)
 		- [Kubernetes 설치 전 서버 구성 변경](#kubernetes-%EC%84%A4%EC%B9%98-%EC%A0%84-%EC%84%9C%EB%B2%84-%EA%B5%AC%EC%84%B1-%EB%B3%80%EA%B2%BD)
 		- [Docker Install](#docker-install)
@@ -40,12 +41,13 @@ Kubernetes 설치 및 운영 101
 	- [고가용성 토폴로지 HA 구성](#%EA%B3%A0%EA%B0%80%EC%9A%A9%EC%84%B1-%ED%86%A0%ED%8F%B4%EB%A1%9C%EC%A7%80-ha-%EA%B5%AC%EC%84%B1)
 		- [중첩된 etcd 토플로지 Stacked etcd](#%EC%A4%91%EC%B2%A9%EB%90%9C-etcd-%ED%86%A0%ED%94%8C%EB%A1%9C%EC%A7%80-stacked-etcd)
 			- [Master Node 설정](#master-node-%EC%84%A4%EC%A0%95)
-		- [HA에서 control plane 노드 제거](#ha%EC%97%90%EC%84%9C-control-plane-%EB%85%B8%EB%93%9C-%EC%A0%9C%EA%B1%B0)
+			- [HA에서 control plane 노드 제거](#ha%EC%97%90%EC%84%9C-control-plane-%EB%85%B8%EB%93%9C-%EC%A0%9C%EA%B1%B0)
 			- [Nginx 정보 참고](#nginx-%EC%A0%95%EB%B3%B4-%EC%B0%B8%EA%B3%A0)
 		- [외부 etcd 토플로지 External etcd](#%EC%99%B8%EB%B6%80-etcd-%ED%86%A0%ED%94%8C%EB%A1%9C%EC%A7%80-external-etcd)
 	- [추가작업](#%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85)
 
 <!-- /TOC -->
+---
 
 ## 사전 준비 
 ### Kubernetes 설치 전 서버 구성 변경 
@@ -848,7 +850,7 @@ kube04   Ready    master   2m7s    v1.19.3
 ```
 
 
-### HA에서 control plane 노드 제거
+#### HA에서 control plane 노드 제거
 - 제거 할 노드에서 reset 명령 실행 
 ```sh
 # kube04 
