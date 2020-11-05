@@ -8,6 +8,7 @@ Kubernetes 설치 및 운영 101
 	- [Table of Contents](#table-of-contents)
 	- [사전 준비](#%EC%82%AC%EC%A0%84-%EC%A4%80%EB%B9%84)
 		- [Kubernetes 설치 전 서버 구성 변경](#kubernetes-%EC%84%A4%EC%B9%98-%EC%A0%84-%EC%84%9C%EB%B2%84-%EA%B5%AC%EC%84%B1-%EB%B3%80%EA%B2%BD)
+		- [Docker Install](#docker-install)
 		- [Cgroup 드라이버 이슈](#cgroup-%EB%93%9C%EB%9D%BC%EC%9D%B4%EB%B2%84-%EC%9D%B4%EC%8A%88)
 	- [Kubernetes kubeadm, kubelet, kubectl 설치](#kubernetes-kubeadm-kubelet-kubectl-%EC%84%A4%EC%B9%98)
 		- [Kubernetes 설치 : Centos7 기준](#kubernetes-%EC%84%A4%EC%B9%98--centos7-%EA%B8%B0%EC%A4%80)
@@ -42,41 +43,41 @@ Kubernetes 설치 및 운영 101
 
 ## 사전 준비 
 ### Kubernetes 설치 전 서버 구성 변경 
-- Swap 영역을 비활성화 
+- 참고 : https://www.mirantis.com/blog/how-install-kubernetes-kubeadm/
 
+- Swap 영역을 비활성화 
 ```sh
 # 일시적인 설정 
-sudo swapoff -a
+$ sudo swapoff -a
 
-# 영구적인 설정 
-# 아래 swap 파일 시스템을 주석처리 
-sudo vi /etc/fstab
-
+# 영구적인 설정, 아래 swap 파일 시스템을 주석처리 
+$ sudo vi /etc/fstab
+...
 # /dev/mapper/kube--master--vg-swap_1 none            swap    sw              0       0
 ```
 
 - SELinux Disable
 ```sh
 # 임시 
-sudo setenforce 0
+$ sudo setenforce 0
 
 # 영구
-sudo vi /etc/sysconfig/selinux
-
+$ sudo vi /etc/sysconfig/selinux
+...
 SELinux=disabled  
 ```
 
 -  방화벽 Disable
 ```
-sudo systemctl disable firewalld
-sudo systemctl stop firewalld
+$ sudo systemctl disable firewalld
+$ sudo systemctl stop firewalld
 ```
 
 - 브릿지 네트워크 할성화 
 
 ```sh
 # Centos
-/etc/sysctl.d/k8s.conf
+$ sudo vim /etc/sysctl.d/k8s.conf
 
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
@@ -84,7 +85,7 @@ net.bridge.bridge-nf-call-iptables = 1
 
 ```sh
 # Ubuntu
-sudo vi /etc/ufw/sysctl.conf
+$ sudo vim /etc/ufw/sysctl.conf
 
 net/bridge/bridge-nf-call-ip6tables = 1
 net/bridge/bridge-nf-call-iptables = 1
@@ -92,8 +93,8 @@ net/bridge/bridge-nf-call-arptables = 1
 
 ```
 
-- 참고 : https://www.mirantis.com/blog/how-install-kubernetes-kubeadm/
-
+### Docker Install 
+- Centos Install : https://docs.docker.com/engine/install/centos/
 
 ### Cgroup 드라이버 이슈 
 - 최신 Kubernetes는 docker cgroup driver를 cgroupfs → systemd 변경 필요
