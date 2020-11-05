@@ -1,10 +1,14 @@
 # Kubernetes 101 
+Kubernetes 설치 및 운영 101
 
+## Table of Contents
 <!-- TOC -->
 
 - [Kubernetes 101](#kubernetes-101)
+	- [Table of Contents](#table-of-contents)
 	- [사전 준비](#%EC%82%AC%EC%A0%84-%EC%A4%80%EB%B9%84)
 		- [Kubernetes 설치 전 서버 구성 변경](#kubernetes-%EC%84%A4%EC%B9%98-%EC%A0%84-%EC%84%9C%EB%B2%84-%EA%B5%AC%EC%84%B1-%EB%B3%80%EA%B2%BD)
+		- [Cgroup 드라이버 이슈](#cgroup-%EB%93%9C%EB%9D%BC%EC%9D%B4%EB%B2%84-%EC%9D%B4%EC%8A%88)
 	- [설치 및 설정](#%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%84%A4%EC%A0%95)
 		- [Kubernetes 설치 : Centos7 기준](#kubernetes-%EC%84%A4%EC%B9%98--centos7-%EA%B8%B0%EC%A4%80)
 		- [Master Node 설정](#master-node-%EC%84%A4%EC%A0%95)
@@ -88,6 +92,49 @@ net/bridge/bridge-nf-call-arptables = 1
 ```
 
 - 참고 : https://www.mirantis.com/blog/how-install-kubernetes-kubeadm/
+
+
+### Cgroup 드라이버 이슈 
+- 최신 Kubernetes는 docker cgroup driver를 cgroupfs → systemd 변경 필요
+  - Master Init 및 Worker Join 시 WARNING 발생 
+- https://kubernetes.io/ko/docs/setup/production-environment/container-runtimes/
+
+```sh
+kubeadm init --pod-network-cidr 10.244.0.0/16
+...
+[init] Using Kubernetes version: v1.19.3
+[preflight] Running pre-flight checks
+	[WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. 
+  The recommended driver is "systemd". ...
+...
+```
+
+- 드라이버 변경 작업 
+  - /etc/docker/daemon.json 파일 작성 
+```sh
+$ cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2",
+  "storage-opts": [
+    "overlay2.override_kernel_check=true"
+  ]
+}
+EOF
+
+# 도커 재시작 
+$ sudo systemctl restart docker
+
+# 확인 
+$ sudo docker info | grep -i cgroup
+ Cgroup Driver: systemd
+```
+
+
 
 ---
 
