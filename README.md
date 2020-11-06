@@ -811,6 +811,8 @@ main-ingress   <none>   *       192.168.28.16   80      25s
 ### 중첩된 etcd 토플로지 (Stacked etcd)
 - 컨트롤 플레인(--control-plane) 구성 요소를 실행하는 kubeadm 관리되는 노드 추가
 
+![](images/2020-11-06-14-54-11.png)
+
 #### Master Node 설정
 - Single Master 구성에서 옵션 추가 필요  
   - kube-apiserver 를 위한 load balancer 구성 필요 
@@ -887,6 +889,8 @@ stream {
 ### 외부 etcd 토플로지 (External etcd)
 - 별도의 서버를 통해 etcd 서비스를 분산하는 방법 
 - 이 토플로지는 중첩된 토플로지에 비해 호스트 개수가 두배나 필요하다. 이 토플로지로 HA 클러스터를 구성하기 위해서는 최소한 3개의 컨트롤 플레인과 3개의 etcd 노드가 필요하다.
+
+![](images/2020-11-06-14-55-08.png)
 
 ---
 ## Kubernetes 초기화 
