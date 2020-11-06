@@ -22,6 +22,14 @@ Kubernetes 설치 및 운영 101
 		- [Scale / 이미지 변경배포](#scale--%EC%9D%B4%EB%AF%B8%EC%A7%80-%EB%B3%80%EA%B2%BD%EB%B0%B0%ED%8F%AC)
 	- [서비스 배포 :  YAML 파일 기반](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%B0%B0%ED%8F%AC---yaml-%ED%8C%8C%EC%9D%BC-%EA%B8%B0%EB%B0%98)
 		- [배포 / 서비스 추가](#%EB%B0%B0%ED%8F%AC--%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%B6%94%EA%B0%80)
+	- [서비스 유형 : ClusterIP vs NodePort vs LoadBalancer](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EC%9C%A0%ED%98%95--clusterip-vs-nodeport-vs-loadbalancer)
+		- [ClusterIP](#clusterip)
+		- [NodePort](#nodeport)
+		- [LoadBalancer](#loadbalancer)
+		- [Ingress](#ingress)
+	- [Kubernetes DNS](#kubernetes-dns)
+		- [Lookup 규칙](#lookup-%EA%B7%9C%EC%B9%99)
+		- [Pod 내부 세팅 : /etc/resolv.conf](#pod-%EB%82%B4%EB%B6%80-%EC%84%B8%ED%8C%85--etcresolvconf)
 	- [서비스 노출 AWS](#%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%85%B8%EC%B6%9C-aws)
 		- [AWS](#aws)
 			- [AWS Ingress](#aws-ingress)
@@ -30,10 +38,6 @@ Kubernetes 설치 및 운영 101
 		- [NodePort : Over a NodePort Service](#nodeport--over-a-nodeport-service)
 		- [External IPs](#external-ips)
 		- [Ingress controller](#ingress-controller)
-		- [Ingress : MetalLB](#ingress--metallb)
-		- [Ingress : NodePort Port](#ingress--nodeport-port)
-		- [Ingress : Via the host network](#ingress--via-the-host-network)
-		- [Ingress : External IPs](#ingress--external-ips)
 	- [기타 Network 분석](#%EA%B8%B0%ED%83%80-network-%EB%B6%84%EC%84%9D)
 		- [K8S Network](#k8s-network)
 		- [EKS ALB](#eks-alb)
@@ -443,6 +447,115 @@ NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE     SE
 mvcapp       NodePort    10.106.102.27   <none>        80:30010/TCP   4h47m   app=mvcapp
 ```
 
+## 서비스 유형 : ClusterIP vs NodePort vs LoadBalancer
+- https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0
+
+### ClusterIP 
+- A ClusterIP service is the default Kubernetes service
+- 클러스터내에서의 유효한 주소 및 Access 가능 
+- 외부 노출을 위해 별도의 Proxy 가 필요 
+
+![](images/2020-11-06-11-40-59.png)
+
+```sh
+$ kubectl get svc
+NAME         TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+kubernetes   ClusterIP   10.43.0.1     <none>        443/TCP        2d18h
+```
+
+### NodePort 
+- ClusterIP 기능 이외에 추가 기능이 있는 서비스 형태 
+- 노드 머신의 kube-proxy 통해 별도 30000-32767 사이의 포트로 서비스 노출
+- `nodePort` 를 통해 지정가능 하며, 지정하지 않으면 랜덤 할당 
+
+![](images/2020-11-06-11-41-30.png)
+
+```sh
+$ kubectl get svc
+NAME         TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+mvcapp       NodePort    10.43.37.45   <none>        80:30010/TCP   2d18h
+```
+
+### LoadBalancer
+- LoadBalancer (L4/L7) 서비스를 통해 Worker Node 를 자동 등록하고 NodePort 를 통해 서비스 연결 
+- Cloud 서비스 등에서만 지원하며 서비스 노출하는 표준적인 방법 
+- Bare Metal 환경에서는 [metallb](https://metallb.universe.tf/) 
+
+![](images/2020-11-06-11-41-49.png)
+
+```
+NAME         TYPE           CLUSTER-IP      EXTERNAL-IP                                        PORT(S)        AGE
+mvcapp       LoadBalancer   172.20.43.194   xxxxx-885321513.ap-northeast-2.elb.amazonaws.com   80:30291/TCP   10d
+```
+
+### Ingress
+- 서비스 유형은 아니며, L7 프로토콜을 통한 "스마트 라우터" 또는 진입점 역할하는 특별한 서비스 
+- 일반적인 L7 Layer Proxy 담당하는 kubernetes 서비스 
+
+![](images/2020-11-06-11-42-08.png)
+
+```
+$ kubectl get po -A
+NAMESPACE       NAME                                      READY   STATUS      RESTARTS   AGE
+...
+ingress-nginx   default-http-backend-65dd5949d9-mlr9f     1/1     Running     0          2d19h
+ingress-nginx   nginx-ingress-controller-q4j6b            1/1     Running     0          2d19h
+ingress-nginx   nginx-ingress-controller-rngt9            1/1     Running     0          2d19h
+...
+
+$ kubectl get ing
+NAME          CLASS    HOSTS   ADDRESS                                             PORTS   AGE
+eks-ingress   <none>   *       xxxxx-1951376961.ap-northeast-2.elb.amazonaws.com   80      9d
+```
+
+## Kubernetes DNS
+ - 클러스터내에 유효한 이름 규칙 및 DNS 서비스 조회를 담당 
+ - `CoreDNS` Kubernetes 1.15 클러스터 지원되며 Kubernetes 이하 버전의 클러스터는 `kube-dns`를 기본 DNS 공급자로 사용
+
+```sh
+$ kubectl get po -A
+NAMESPACE       NAME                                      READY   STATUS      RESTARTS   AGE
+...
+kube-system     coredns-6f85d5fb88-njg26                  1/1     Running     0          2d19h
+kube-system     coredns-6f85d5fb88-ns99n                  1/1     Running     0          2d18h
+kube-system     coredns-autoscaler-79599b9dc6-gtpzq       1/1     Running     0          2d19h
+
+$ kubectl get svc -A
+NAMESPACE       NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                  AGE
+kube-system     kube-dns               ClusterIP   10.43.0.10     <none>        53/UDP,53/TCP,9153/TCP   2d19h
+```
+
+### Lookup 규칙
+- https://kubernetes.io/ko/docs/concepts/services-networking/dns-pod-service/
+- Service: `[service-name]`.`[namespace]`.svc.cluster.local
+
+```sh
+$ nslookup
+> lserver 10.43.0.10
+Default server: 10.43.0.10
+Address: 10.43.0.10#53
+
+> mvcapp.default.svc.cluster.local
+Server:		10.43.0.10
+Address:	10.43.0.10#53
+
+Name:	mvcapp.default.svc.cluster.local
+Address: 10.43.37.45
+```
+
+
+### Pod 내부 세팅 : `/etc/resolv.conf`
+- 해당 Pod 에 해당하는 이름 규칙의 질의 내용 표시 
+- `default.svc.cluster.local` `svc.cluster.local` `cluster.local`
+
+```sh
+$ kubectl exec -it mvcapp-6cc9667f94-ljvjx -- /bin/bash
+root@mvcapp-6cc9667f94-ljvjx:/app$ cat /etc/resolv.conf 
+nameserver 10.43.0.10
+search default.svc.cluster.local svc.cluster.local cluster.local
+options ndots:5
+```
+
 ---
 ## 서비스 노출 (AWS)
 
@@ -450,7 +563,6 @@ mvcapp       NodePort    10.106.102.27   <none>        80:30010/TCP   4h47m   ap
 - type: LoadBalancer : 서비스 타입을 LoadBalancer 지정하면 EXTERNAL-IP 자동으로 할당 
 - Ingress 활용 : annotations 을 통해 alb 할당
 - [EKS 클러스터 생성 및 Ingress](eks/README.md)
-
 
 ```yaml
 apiVersion: v1
@@ -507,6 +619,11 @@ eks-ingress   *       xx-default-eksingres-ea83.ap-northeast-2.elb.amazonaws.com
 - 쿠버네티스 네트워킹 이해하기 : https://coffeewhale.com/k8s/network/2019/05/30/k8s-network-03/
 
 ### MetalLB 활용 
+- [memberlist](https://github.com/hashicorp/memberlist) 기반 ARP`(IPv4)`/NDP`(IPv6)` 활용 LB 리더 역할 관리
+- metallb vs keepalibed : https://metallb.universe.tf/concepts/layer2/#comparison-to-keepalived
+> - Keepalived uses the Virtual Router Redundancy Protocol (VRRP). Instances of Keepalived continuously exchange VRRP messages with each other, both to select a leader and to notice when that leader goes away.
+> - MetalLB on the other hand relies on memberlist to know when a Node in the cluster is no longer reachable and the service IPs from that node should be moved elsewhere.
+
 ![](https://kubernetes.github.io/ingress-nginx/images/baremetal/metallb.jpg)
 
 - 설치 : https://metallb.universe.tf/installation/#installation-by-manifest
@@ -555,9 +672,9 @@ $ curl 192.168.28.100
 ```
 
 ### NodePort : Over a NodePort Service
-![](https://kubernetes.github.io/ingress-nginx/images/baremetal/nodeport.jpg)
+- Nodeport 자동(수동)으로 할당한 30000-32767 over port 활용 
 
-- Nodeport 에서 자동으로 할당한 30000 over port 활용 
+![](https://kubernetes.github.io/ingress-nginx/images/baremetal/nodeport.jpg)
 
 ```yml
 apiVersion: v1
@@ -668,116 +785,6 @@ NAME           CLASS    HOSTS   ADDRESS         PORTS   AGE
 main-ingress   <none>   *       192.168.28.16   80      25s
 ```
 
-### Ingress : MetalLB
-![](https://kubernetes.github.io/ingress-nginx/images/baremetal/metallb.jpg)
-
-- Ingress 서비스를 type: LoadBalancer 으로 설정 → MetalLB
-
-### Ingress : NodePort Port 
-![](https://kubernetes.github.io/ingress-nginx/images/baremetal/nodeport.jpg)
-
-- ingress-nginx ingress-nginx-controller NodePort 10.111.152.85 <none> 80:**32293**/TCP,443:**32325**/TCP   3m56s
-```
-$ kubectl get svc -A
-NAMESPACE       NAME                                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
-...
-default         mvcapp                               NodePort    10.106.102.27   <none>        80:30010/TCP                 5m6s
-ingress-nginx   ingress-nginx-controller             NodePort    10.111.152.85   <none>        80:32293/TCP,443:32325/TCP   3m56s
-...
-```
-
-### Ingress : Via the host network
-![](https://kubernetes.github.io/ingress-nginx/images/baremetal/hostnetwork.jpg)
-- Deploy hostNetwork: true 설정  
-  - Ingress Bind IP 만 설정됨 (Not DaemonSet)
-
-```yaml
-kind: Deployment
-spec:
-...
-  template:
-...
-    spec:
-      hostNetwork: true
-      dnsPolicy: ClusterFirst
-      containers:
-        - name: controller
-          image: k8s.gcr.io/ingress-nginx/controller:v0.40.2@sha256:46ba23c3fbaafd9e5bd01ea85b2f921d9f2217be082580edc22e6c704a83f02f
-...
-```
-
-```sh
-$ kubectl get ing -A
-NAMESPACE   NAME           CLASS    HOSTS   ADDRESS         PORTS   AGE
-default     main-ingress   <none>   *       192.168.28.16   80      76m
-
-$ ansible all -m shell -a "netstat -an | grep 'LISTEN ' | grep ':80' "
-node2 | CHANGED | rc=0 >>
-tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN     
-tcp6       0      0 :::80                   :::*                    LISTEN     
-node3 | FAILED | rc=1 >>
-non-zero return code
-node1 | FAILED | rc=1 >>
-non-zero return code
-```
-
-### Ingress : External IPs
-- This method does not allow preserving the source IP of HTTP requests in any manner, it is therefore not recommended to use it despite its apparent simplicity.
-- 일반적으로 권고하지 않음 
-
-```yaml
-# Source: ingress-nginx/templates/controller-service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    helm.sh/chart: ingress-nginx-3.6.0
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/version: 0.40.2
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/component: controller
-  name: ingress-nginx-controller
-  namespace: ingress-nginx
-spec:
-  type: NodePort
-  ports:
-    - name: http
-      port: 80
-      protocol: TCP
-      targetPort: http
-    - name: https
-      port: 443
-      protocol: TCP
-      targetPort: https
-  selector:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/instance: ingress-nginx
-    app.kubernetes.io/component: controller
-  externalIPs:
-    - 192.168.28.15
-    - 192.168.28.16
-    - 192.168.28.17
-``` 
-
-```sh
-$ kubectl get svc -A
-...
-NAMESPACE       NAME                                 TYPE        CLUSTER-IP       EXTERNAL-IP                                 PORT(S)                      AGE
-default         mvcapp                               NodePort    10.106.102.27    <none>                                      80:30010/TCP                 59m
-ingress-nginx   ingress-nginx-controller             NodePort    10.109.74.44     192.168.28.15,192.168.28.16,192.168.28.17   80:32464/TCP,443:31106/TCP   4m29s
-...
-```
-
-```sh
-$ ansible all -m shell -a "netstat -an | grep 'LISTEN ' | grep ':80' "
-node3 | CHANGED | rc=0 >>
-tcp        0      0 192.168.28.17:80        0.0.0.0:*               LISTEN     
-node1 | CHANGED | rc=0 >>
-tcp        0      0 192.168.28.15:80        0.0.0.0:*               LISTEN     
-node2 | CHANGED | rc=0 >>
-tcp        0      0 192.168.28.16:80        0.0.0.0:*               LISTEN     
-```
 ---
 ## 기타 Network 분석
 
