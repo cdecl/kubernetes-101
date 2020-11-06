@@ -624,7 +624,7 @@ eks-ingress   *       xx-default-eksingres-ea83.ap-northeast-2.elb.amazonaws.com
 > - Keepalived uses the Virtual Router Redundancy Protocol (VRRP). Instances of Keepalived continuously exchange VRRP messages with each other, both to select a leader and to notice when that leader goes away.
 > - MetalLB on the other hand relies on memberlist to know when a Node in the cluster is no longer reachable and the service IPs from that node should be moved elsewhere.
 
-![](https://kubernetes.github.io/ingress-nginx/images/baremetal/metallb.jpg)
+![](images/2020-11-06-12-54-02.png)
 
 - 설치 : https://metallb.universe.tf/installation/#installation-by-manifest
 ```sh
@@ -674,7 +674,7 @@ $ curl 192.168.28.100
 ### NodePort : Over a NodePort Service
 - Nodeport 자동(수동)으로 할당한 30000-32767 over port 활용 
 
-![](https://kubernetes.github.io/ingress-nginx/images/baremetal/nodeport.jpg)
+![](images/2020-11-06-12-54-53.png)
 
 ```yml
 apiVersion: v1
