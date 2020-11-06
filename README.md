@@ -39,16 +39,15 @@ Kubernetes 설치 및 운영 101
 		- [External IPs](#external-ips)
 		- [Ingress controller](#ingress-controller)
 	- [기타 Network 분석](#%EA%B8%B0%ED%83%80-network-%EB%B6%84%EC%84%9D)
-		- [K8S Network](#k8s-network)
-		- [EKS ALB](#eks-alb)
-	- [Kubernetes 초기화](#kubernetes-%EC%B4%88%EA%B8%B0%ED%99%94)
+		- [Route](#route)
+		- [AWS EKS LoadBalancer](#aws-eks-loadbalancer)
 	- [고가용성 토폴로지 HA 구성](#%EA%B3%A0%EA%B0%80%EC%9A%A9%EC%84%B1-%ED%86%A0%ED%8F%B4%EB%A1%9C%EC%A7%80-ha-%EA%B5%AC%EC%84%B1)
 		- [중첩된 etcd 토플로지 Stacked etcd](#%EC%A4%91%EC%B2%A9%EB%90%9C-etcd-%ED%86%A0%ED%94%8C%EB%A1%9C%EC%A7%80-stacked-etcd)
 			- [Master Node 설정](#master-node-%EC%84%A4%EC%A0%95)
 			- [HA에서 control plane 노드 제거](#ha%EC%97%90%EC%84%9C-control-plane-%EB%85%B8%EB%93%9C-%EC%A0%9C%EA%B1%B0)
 			- [Nginx 정보 참고](#nginx-%EC%A0%95%EB%B3%B4-%EC%B0%B8%EA%B3%A0)
 		- [외부 etcd 토플로지 External etcd](#%EC%99%B8%EB%B6%80-etcd-%ED%86%A0%ED%94%8C%EB%A1%9C%EC%A7%80-external-etcd)
-	- [추가작업](#%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85)
+	- [Kubernetes 초기화](#kubernetes-%EC%B4%88%EA%B8%B0%ED%99%94)
 
 <!-- /TOC -->
 ---
@@ -788,23 +787,20 @@ main-ingress   <none>   *       192.168.28.16   80      25s
 ---
 ## 기타 Network 분석
 
-###  K8S Network
+### Route
+- Route table 기반으로 Pod 이 존재하는 Gateway로 보내는 구조 
+- ① 접속하는 Node에 존재하는 Pod 은 Gateway를 `0.0.0.0` 해당 Node 처리
+- ② 다른 Node에 존재하는 Pod 은 해당 대역대의 서버(Gateway) 보내어 ①과 같은 과정으로 처리 후 리턴 
+
 ![image](https://user-images.githubusercontent.com/5927142/97154892-dbdbc800-17b7-11eb-83fc-91597588eeaa.png)
 
 ![image](https://user-images.githubusercontent.com/5927142/97154530-5526eb00-17b7-11eb-86be-1a260cb0291e.png)
 
 --- 
+### AWS EKS LoadBalancer 
+- ALB/NLB Target Group의 NodePort I/F 를 통해 서비스 접속 
 
-### EKS ALB 
-![image](https://user-images.githubusercontent.com/5927142/97155321-8a800880-17b8-11eb-85ed-82c1abbd62ed.png)
-
-
----
-
-## Kubernetes 초기화 
-```
-sudo kubeadm reset -f
-```
+![](images/2020-11-06-13-09-56.png)
 
 ---
 
@@ -892,8 +888,11 @@ stream {
 - 별도의 서버를 통해 etcd 서비스를 분산하는 방법 
 - 이 토플로지는 중첩된 토플로지에 비해 호스트 개수가 두배나 필요하다. 이 토플로지로 HA 클러스터를 구성하기 위해서는 최소한 3개의 컨트롤 플레인과 3개의 etcd 노드가 필요하다.
 
-
 ---
-## 추가작업 
-- 버전 업그레이드 방법 
+## Kubernetes 초기화 
+
+```sh
+$ sudo kubeadm reset -f
+```
+
  
