@@ -13,7 +13,7 @@ Kubespray 를 이용한 Kubernetes 설치 (Baremetal)
 192.168.28.17
 ```
 
-### 서버 노드 환경설정 : [kubernetes-101 참고](/devops/kubernetes-101/){:target="_blank"}
+### 서버 노드 환경설정 : [kubernetes-101 참고](/devops/kubernetes-101/)
 - Swap 영역을 비활성화
 - SELinux Disable
 - 방화벽 Disable
@@ -331,7 +331,7 @@ mvcapp-5c56c55f76-xvlbp   1/1     Running   0          48s   10.233.92.1   node3
 ---
 
 ## 클러스터 고가용성 구조
-- <https://github.com/kubernetes-sigs/kubespray/blob/master/docs/ha-mode.md>{:target="_blank"}
+- <https://github.com/kubernetes-sigs/kubespray/blob/master/docs/ha-mode.md>
 
 ### Etcd 클러스터 구성
 
@@ -346,7 +346,7 @@ mvcapp-5c56c55f76-xvlbp   1/1     Running   0          48s   10.233.92.1   node3
 ---
 
 ## Node 추가 및 Cluster 변경
-- <https://github.com/kubernetes-sigs/kubespray/blob/master/docs/nodes.md>{:target="_blank"}
+- <https://github.com/kubernetes-sigs/kubespray/blob/master/docs/nodes.md>
 
 #### 1) Control-plane 변경 
 - Change order of current control planes
